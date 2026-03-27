@@ -1,0 +1,1774 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Claude Code 小白教程 — 从零到共生</title>
+<style>
+  :root {
+    --bg: #fafaf8;
+    --surface: #ffffff;
+    --surface-2: #f5f5f0;
+    --border: #e5e5df;
+    --border-light: #eeeeea;
+    --text: #1a1a1a;
+    --text-2: #666660;
+    --text-3: #999990;
+    --accent: #6C5CE7;
+    --accent-light: #8B7CF0;
+    --accent-dim: rgba(108, 92, 231, 0.08);
+    --accent-dim2: rgba(108, 92, 231, 0.04);
+    --green: #00b894;
+    --green-dim: rgba(0, 184, 148, 0.08);
+    --blue: #0984e3;
+    --blue-dim: rgba(9, 132, 227, 0.08);
+    --orange: #e17055;
+    --orange-dim: rgba(225, 112, 85, 0.08);
+    --pink: #e84393;
+    --pink-dim: rgba(232, 67, 147, 0.08);
+    --yellow: #fdcb6e;
+    --yellow-dim: rgba(253, 203, 110, 0.15);
+    --radius: 14px;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.05), 0 2px 4px rgba(0,0,0,0.02);
+    --shadow-lg: 0 12px 40px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.03);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Helvetica Neue", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.75;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ─── Hero ─── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 2rem;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(180deg, #f0eeff 0%, var(--bg) 100%);
+  }
+
+  .hero::before {
+    content: '';
+    position: absolute;
+    top: -30%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(108,92,231,0.08) 0%, transparent 70%);
+    border-radius: 50%;
+  }
+
+  .hero-content { position: relative; z-index: 1; max-width: 680px; }
+
+  .hero-tag {
+    display: inline-block;
+    padding: 0.4rem 1.1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    font-size: 0.85rem;
+    color: var(--text-2);
+    margin-bottom: 2rem;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .hero h1 {
+    font-size: clamp(2.4rem, 5.5vw, 4rem);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1.12;
+    margin-bottom: 1.2rem;
+    color: var(--text);
+  }
+
+  .hero h1 span {
+    background: linear-gradient(135deg, var(--accent) 0%, var(--pink) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero p {
+    font-size: 1.15rem;
+    color: var(--text-2);
+    max-width: 520px;
+    margin: 0 auto 2.5rem;
+    line-height: 1.8;
+  }
+
+  .hero-features {
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+  }
+
+  .hero-feature {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--text-2);
+  }
+
+  .hero-feature .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+
+  .scroll-hint {
+    position: absolute;
+    bottom: 2.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    color: var(--text-3);
+    font-size: 0.8rem;
+    animation: bounce 2.5s ease-in-out infinite;
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(8px); }
+  }
+
+  /* ─── TOC ─── */
+  .toc {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(250, 250, 248, 0.88);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border-light);
+    padding: 0.7rem 2rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .toc::-webkit-scrollbar { display: none; }
+
+  .toc-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    gap: 0.25rem;
+  }
+
+  .toc a {
+    display: inline-block;
+    padding: 0.4rem 0.85rem;
+    border-radius: 100px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--text-2);
+    text-decoration: none;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .toc a:hover { background: var(--accent-dim); color: var(--accent); }
+
+  /* ─── Main ─── */
+  main {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 0 1.5rem 6rem;
+  }
+
+  /* ─── Part ─── */
+  .part {
+    margin-top: 5rem;
+    scroll-margin-top: 4rem;
+  }
+
+  .part-label {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: var(--accent-dim);
+    padding: 0.3rem 0.8rem;
+    border-radius: 100px;
+    margin-bottom: 0.8rem;
+  }
+
+  .part h2 {
+    font-size: clamp(1.7rem, 3.5vw, 2.3rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    margin-bottom: 0.6rem;
+    color: var(--text);
+  }
+
+  .part-desc {
+    color: var(--text-2);
+    font-size: 1.05rem;
+    margin-bottom: 2.5rem;
+    max-width: 620px;
+    line-height: 1.8;
+  }
+
+  /* ─── Card ─── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius);
+    padding: 1.6rem 1.8rem;
+    margin-bottom: 1.1rem;
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow 0.2s, border-color 0.2s;
+  }
+
+  .card:hover {
+    box-shadow: var(--shadow-md);
+    border-color: var(--border);
+  }
+
+  .card h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.6rem;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .card p, .card li {
+    color: var(--text-2);
+    font-size: 0.95rem;
+    line-height: 1.75;
+  }
+
+  .card ul {
+    list-style: none;
+    padding: 0;
+    margin-top: 0.5rem;
+  }
+
+  .card li {
+    padding: 0.3rem 0 0.3rem 1.4rem;
+    position: relative;
+  }
+
+  .card li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.85rem;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    opacity: 0.5;
+  }
+
+  /* ─── Diagram container ─── */
+  .diagram {
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    margin: 1.2rem 0;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    justify-content: center;
+    overflow-x: auto;
+  }
+
+  .diagram svg { max-width: 100%; height: auto; }
+
+  .diagram-caption {
+    text-align: center;
+    font-size: 0.82rem;
+    color: var(--text-3);
+    margin-top: 0.5rem;
+    font-style: italic;
+  }
+
+  /* ─── Analogy ─── */
+  .analogy {
+    background: var(--accent-dim);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 1rem 1.3rem;
+    margin: 1rem 0;
+    font-size: 0.93rem;
+    color: var(--text);
+  }
+
+  .analogy strong { color: var(--accent); }
+
+  /* ─── Tip box ─── */
+  .tip {
+    background: var(--green-dim);
+    border-left: 3px solid var(--green);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 1rem 1.3rem;
+    margin: 1rem 0;
+    font-size: 0.93rem;
+  }
+
+  .tip strong { color: var(--green); }
+
+  .warning {
+    background: var(--orange-dim);
+    border-left: 3px solid var(--orange);
+    border-radius: 0 var(--radius) var(--radius) 0;
+    padding: 1rem 1.3rem;
+    margin: 1rem 0;
+    font-size: 0.93rem;
+  }
+
+  .warning strong { color: var(--orange); }
+
+  /* ─── Code ─── */
+  .code-block {
+    background: #1e1e2e;
+    border-radius: 10px;
+    padding: 1.2rem 1.4rem;
+    font-family: "SF Mono", "Fira Code", "JetBrains Mono", monospace;
+    font-size: 0.85rem;
+    color: #cdd6f4;
+    overflow-x: auto;
+    margin: 0.8rem 0;
+    line-height: 1.7;
+    box-shadow: var(--shadow-md);
+  }
+
+  .code-block .prompt { color: #a6e3a1; }
+  .code-block .comment { color: #6c7086; }
+  .code-block .output { color: #89b4fa; }
+  .code-block .highlight { color: #f9e2af; }
+
+  /* ─── Level cards ─── */
+  .levels { display: flex; flex-direction: column; gap: 1.1rem; }
+
+  .level-card {
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius);
+    padding: 1.8rem;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.3s;
+  }
+
+  .level-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .level-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+  }
+
+  .level-card:nth-child(1)::before { background: var(--green); }
+  .level-card:nth-child(2)::before { background: var(--blue); }
+  .level-card:nth-child(3)::before { background: var(--accent); }
+  .level-card:nth-child(4)::before { background: var(--orange); }
+  .level-card:nth-child(5)::before { background: var(--pink); }
+  .level-card:nth-child(6)::before { background: linear-gradient(180deg, var(--accent), var(--pink)); }
+
+  .level-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.25rem 0.75rem;
+    border-radius: 100px;
+    margin-bottom: 0.6rem;
+  }
+
+  .level-card:nth-child(1) .level-badge { background: var(--green-dim); color: var(--green); }
+  .level-card:nth-child(2) .level-badge { background: var(--blue-dim); color: var(--blue); }
+  .level-card:nth-child(3) .level-badge { background: var(--accent-dim); color: var(--accent); }
+  .level-card:nth-child(4) .level-badge { background: var(--orange-dim); color: var(--orange); }
+  .level-card:nth-child(5) .level-badge { background: var(--pink-dim); color: var(--pink); }
+  .level-card:nth-child(6) .level-badge { background: linear-gradient(135deg, var(--accent-dim), var(--pink-dim)); color: var(--accent); }
+
+  .level-card h3 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  .level-card .example {
+    color: var(--text-2);
+    font-size: 0.9rem;
+    margin-bottom: 0.8rem;
+    padding: 0.6rem 0.8rem;
+    background: var(--surface-2);
+    border-radius: 8px;
+    border-left: 2px solid var(--border);
+  }
+
+  .level-card .desc {
+    color: var(--text-2);
+    font-size: 0.93rem;
+    margin-bottom: 0.8rem;
+    line-height: 1.7;
+  }
+
+  .level-card ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .level-card li {
+    color: var(--text-2);
+    font-size: 0.9rem;
+    padding: 0.25rem 0 0.25rem 1.3rem;
+    position: relative;
+  }
+
+  .level-card li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.7rem;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--text-3);
+  }
+
+  .level-card .key-insight {
+    margin-top: 0.8rem;
+    padding: 0.7rem 1rem;
+    background: var(--accent-dim2);
+    border: 1px solid var(--accent-dim);
+    border-radius: 10px;
+    font-size: 0.9rem;
+    color: var(--accent);
+  }
+
+  /* ─── Config grid ─── */
+  .config-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  @media (max-width: 600px) { .config-grid { grid-template-columns: 1fr; } }
+
+  .config-card {
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-sm);
+    transition: all 0.2s;
+  }
+
+  .config-card:hover { box-shadow: var(--shadow-md); }
+
+  .config-icon { font-size: 1.6rem; margin-bottom: 0.8rem; }
+
+  .config-card h3 { font-size: 1.05rem; font-weight: 700; margin-bottom: 0.3rem; }
+
+  .config-card .subtitle {
+    color: var(--accent);
+    font-size: 0.82rem;
+    font-weight: 600;
+    margin-bottom: 0.6rem;
+  }
+
+  .config-card p { color: var(--text-2); font-size: 0.9rem; }
+
+  /* ─── Callout ─── */
+  .callout {
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius);
+    padding: 2rem;
+    margin: 2.5rem 0;
+    text-align: center;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .callout p {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.7;
+  }
+
+  .callout .attribution {
+    font-size: 0.85rem;
+    color: var(--text-3);
+    margin-top: 0.6rem;
+  }
+
+  /* ─── Steps ─── */
+  .step {
+    display: flex;
+    gap: 1.1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .step-num {
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    background: var(--accent);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #fff;
+    margin-top: 0.1rem;
+  }
+
+  .step-content h4 { font-size: 1rem; font-weight: 700; margin-bottom: 0.3rem; }
+  .step-content p { color: var(--text-2); font-size: 0.93rem; }
+
+  /* ─── Evolution ─── */
+  .evolution {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.8rem;
+    margin: 2.5rem 0;
+    flex-wrap: wrap;
+  }
+
+  .evolution-step {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--accent);
+    padding: 0.5rem 1.2rem;
+    background: var(--accent-dim);
+    border-radius: 100px;
+  }
+
+  .evolution-arrow { color: var(--text-3); font-size: 1.2rem; }
+
+  /* ─── Scenario ─── */
+  .scenario {
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius);
+    padding: 1.3rem 1.5rem;
+    margin-bottom: 0.8rem;
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow 0.2s;
+  }
+
+  .scenario:hover { box-shadow: var(--shadow-md); }
+
+  .scenario-icon { font-size: 1.5rem; flex-shrink: 0; margin-top: 0.1rem; }
+
+  .scenario-text { font-size: 0.93rem; color: var(--text-2); line-height: 1.7; }
+  .scenario-text strong { color: var(--text); }
+
+  /* ─── Comparison table ─── */
+  .compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    font-size: 0.9rem;
+  }
+
+  .compare-table th {
+    background: var(--surface-2);
+    padding: 0.7rem 1rem;
+    text-align: left;
+    font-weight: 600;
+    border-bottom: 2px solid var(--border);
+    font-size: 0.85rem;
+    color: var(--text-2);
+  }
+
+  .compare-table td {
+    padding: 0.7rem 1rem;
+    border-bottom: 1px solid var(--border-light);
+    color: var(--text-2);
+    vertical-align: top;
+  }
+
+  .compare-table tr:last-child td { border-bottom: none; }
+
+  /* ─── Footer ─── */
+  footer {
+    max-width: 780px;
+    margin: 0 auto;
+    padding: 3rem 1.5rem;
+    border-top: 1px solid var(--border-light);
+    text-align: center;
+    color: var(--text-3);
+    font-size: 0.85rem;
+  }
+
+  footer a { color: var(--accent); text-decoration: none; }
+
+  html { scroll-behavior: smooth; }
+
+  /* ─── Mobile ─── */
+  @media (max-width: 600px) {
+    .hero { min-height: 88vh; padding: 1.5rem; }
+    main { padding: 0 1rem 4rem; }
+    .part { margin-top: 3.5rem; }
+    .toc { padding: 0.6rem 1rem; }
+    .card { padding: 1.3rem 1.4rem; }
+    .level-card { padding: 1.4rem; }
+    .hero-features { gap: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════ Hero ═══════ -->
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-tag">为非技术人写的 AI 协作指南</div>
+    <h1>Claude Code<br><span>从零到共生</span></h1>
+    <p>不只教你用工具，更教你理解——人与 AI 协作的认知地图。从"不知道命令行是什么"到"构建你的 AI 操作系统"。</p>
+    <div class="hero-features">
+      <div class="hero-feature"><div class="dot"></div>7 个章节</div>
+      <div class="hero-feature"><div class="dot"></div>6 层协作认知</div>
+      <div class="hero-feature"><div class="dot"></div>零基础友好</div>
+    </div>
+  </div>
+  <div class="scroll-hint">↓ 向下滚动开始</div>
+</section>
+
+<!-- ═══════ TOC ═══════ -->
+<nav class="toc">
+  <div class="toc-inner">
+    <a href="#part0">Part 0 心智模型</a>
+    <a href="#part1">Part 1 准备工作</a>
+    <a href="#part2">Part 2 基础操作</a>
+    <a href="#part3">Part 3 协作层级</a>
+    <a href="#part4">Part 4 配置体系</a>
+    <a href="#part5">Part 5 沉淀工作流</a>
+    <a href="#part6">Part 6 实战场景</a>
+  </div>
+</nav>
+
+<main>
+
+<!-- ═══════════════════════════════════════
+     Part 0 心智模型
+     ═══════════════════════════════════════ -->
+<section class="part" id="part0">
+  <div class="part-label">Part 0</div>
+  <h2>你的电脑是怎么运作的</h2>
+  <p class="part-desc">在碰任何 AI 工具之前，先在脑子里建立正确的"数字世界地图"。大部分小白卡住不是因为不会操作，是因为脑子里没有正确的画面。这一章帮你把画面补上。</p>
+
+  <!-- 文件与文件夹 -->
+  <div class="card">
+    <h3>📁 文件与文件夹</h3>
+    <p>你在电脑上做的一切——写文档、存照片、装软件——最终都变成了<strong>文件</strong>，放在某个<strong>文件夹</strong>里。文件夹可以嵌套，形成一棵"树"。</p>
+    <div class="analogy"><strong>类比：</strong>文件 = 一张纸，文件夹 = 抽屉。你的电脑就是一个巨大的文件柜，每个抽屉里还可以有小抽屉。</div>
+
+    <!-- 文件树示意图 -->
+    <div class="diagram">
+      <svg width="420" height="280" viewBox="0 0 420 280" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Root -->
+        <rect x="160" y="12" width="100" height="36" rx="8" fill="#6C5CE7" fill-opacity="0.1" stroke="#6C5CE7" stroke-width="1.5"/>
+        <text x="210" y="35" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="13" font-weight="600" fill="#6C5CE7">我的电脑</text>
+
+        <!-- Lines from root -->
+        <line x1="180" y1="48" x2="80" y2="80" stroke="#ddd" stroke-width="1.5"/>
+        <line x1="210" y1="48" x2="210" y2="80" stroke="#ddd" stroke-width="1.5"/>
+        <line x1="240" y1="48" x2="340" y2="80" stroke="#ddd" stroke-width="1.5"/>
+
+        <!-- Level 1 folders -->
+        <rect x="30" y="80" width="100" height="32" rx="7" fill="#0984e3" fill-opacity="0.08" stroke="#0984e3" stroke-width="1.2"/>
+        <text x="44" y="100" font-family="-apple-system,sans-serif" font-size="12" fill="#0984e3">📁 桌面</text>
+
+        <rect x="160" y="80" width="100" height="32" rx="7" fill="#0984e3" fill-opacity="0.08" stroke="#0984e3" stroke-width="1.2"/>
+        <text x="174" y="100" font-family="-apple-system,sans-serif" font-size="12" fill="#0984e3">📁 文档</text>
+
+        <rect x="290" y="80" width="100" height="32" rx="7" fill="#0984e3" fill-opacity="0.08" stroke="#0984e3" stroke-width="1.2"/>
+        <text x="304" y="100" font-family="-apple-system,sans-serif" font-size="12" fill="#0984e3">📁 下载</text>
+
+        <!-- Lines from 文档 -->
+        <line x1="190" y1="112" x2="110" y2="148" stroke="#ddd" stroke-width="1.2"/>
+        <line x1="210" y1="112" x2="210" y2="148" stroke="#ddd" stroke-width="1.2"/>
+        <line x1="230" y1="112" x2="310" y2="148" stroke="#ddd" stroke-width="1.2"/>
+
+        <!-- Level 2 -->
+        <rect x="50" y="148" width="110" height="32" rx="7" fill="#00b894" fill-opacity="0.08" stroke="#00b894" stroke-width="1.2"/>
+        <text x="64" y="168" font-family="-apple-system,sans-serif" font-size="12" fill="#00b894">📁 工作项目</text>
+
+        <rect x="170" y="148" width="80" height="32" rx="7" fill="#e17055" fill-opacity="0.06" stroke="#e17055" stroke-width="1.2"/>
+        <text x="184" y="168" font-family="-apple-system,sans-serif" font-size="12" fill="#e17055">📄 简历</text>
+
+        <rect x="260" y="148" width="110" height="32" rx="7" fill="#00b894" fill-opacity="0.08" stroke="#00b894" stroke-width="1.2"/>
+        <text x="274" y="168" font-family="-apple-system,sans-serif" font-size="12" fill="#00b894">📁 个人照片</text>
+
+        <!-- Level 3 from 工作项目 -->
+        <line x1="85" y1="180" x2="60" y2="216" stroke="#ddd" stroke-width="1.2"/>
+        <line x1="115" y1="180" x2="170" y2="216" stroke="#ddd" stroke-width="1.2"/>
+
+        <rect x="10" y="216" width="100" height="30" rx="6" fill="#e17055" fill-opacity="0.06" stroke="#e17055" stroke-width="1"/>
+        <text x="24" y="235" font-family="-apple-system,sans-serif" font-size="11" fill="#e17055">📄 方案.docx</text>
+
+        <rect x="125" y="216" width="100" height="30" rx="6" fill="#e17055" fill-opacity="0.06" stroke="#e17055" stroke-width="1"/>
+        <text x="139" y="235" font-family="-apple-system,sans-serif" font-size="11" fill="#e17055">📄 数据.xlsx</text>
+
+        <!-- Legend -->
+        <rect x="280" y="224" width="12" height="12" rx="3" fill="#0984e3" fill-opacity="0.15" stroke="#0984e3" stroke-width="1"/>
+        <text x="298" y="235" font-family="-apple-system,sans-serif" font-size="11" fill="#666">= 文件夹（抽屉）</text>
+        <rect x="280" y="244" width="12" height="12" rx="3" fill="#e17055" fill-opacity="0.1" stroke="#e17055" stroke-width="1"/>
+        <text x="298" y="255" font-family="-apple-system,sans-serif" font-size="11" fill="#666">= 文件（纸张）</text>
+      </svg>
+    </div>
+    <div class="diagram-caption">文件系统就像一棵倒过来的树：从根目录向下展开，文件夹可以包含文件夹</div>
+
+    <p>在电脑里，你看到的<strong>桌面</strong>、<strong>文档</strong>、<strong>下载</strong>其实都是文件夹。当你把一个 Word 文件"保存到桌面"时，实际上是把这个文件放到了"桌面"这个文件夹里。理解这一点非常重要——因为 Claude Code 就是通过这棵"树"来找你的文件的。</p>
+  </div>
+
+  <!-- 桌面 vs 命令行 -->
+  <div class="card">
+    <h3>🖥 桌面系统 vs 命令行</h3>
+    <p>你平时用电脑的方式——点图标、拖文件、双击打开——这叫<strong>图形界面（GUI）</strong>。还有另一种方式，用<strong>文字</strong>跟电脑对话，叫<strong>命令行（CLI）</strong>。</p>
+
+    <div class="diagram">
+      <svg width="560" height="210" viewBox="0 0 560 210" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- GUI Side -->
+        <rect x="20" y="20" width="230" height="170" rx="12" fill="#0984e3" fill-opacity="0.04" stroke="#0984e3" stroke-width="1.2"/>
+        <text x="135" y="50" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="14" font-weight="700" fill="#0984e3">图形界面（GUI）</text>
+        <text x="135" y="72" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" fill="#999">你平时用的方式</text>
+
+        <!-- Icons -->
+        <rect x="45" y="90" width="46" height="46" rx="10" fill="#0984e3" fill-opacity="0.1"/>
+        <text x="68" y="120" text-anchor="middle" font-size="22">📁</text>
+        <text x="68" y="150" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#666">双击打开</text>
+
+        <rect x="110" y="90" width="46" height="46" rx="10" fill="#0984e3" fill-opacity="0.1"/>
+        <text x="133" y="120" text-anchor="middle" font-size="22">🖱</text>
+        <text x="133" y="150" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#666">拖拽移动</text>
+
+        <rect x="175" y="90" width="46" height="46" rx="10" fill="#0984e3" fill-opacity="0.1"/>
+        <text x="198" y="120" text-anchor="middle" font-size="22">🗑</text>
+        <text x="198" y="150" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#666">拖到废纸篓</text>
+
+        <text x="135" y="177" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" fill="#0984e3" font-weight="600">看到什么 → 点什么</text>
+
+        <!-- VS -->
+        <text x="280" y="110" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="13" font-weight="700" fill="#ccc">VS</text>
+
+        <!-- CLI Side -->
+        <rect x="310" y="20" width="230" height="170" rx="12" fill="#6C5CE7" fill-opacity="0.04" stroke="#6C5CE7" stroke-width="1.2"/>
+        <text x="425" y="50" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="14" font-weight="700" fill="#6C5CE7">命令行（CLI）</text>
+        <text x="425" y="72" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" fill="#999">Claude Code 用的方式</text>
+
+        <!-- Terminal mockup -->
+        <rect x="330" y="86" width="190" height="72" rx="6" fill="#1e1e2e"/>
+        <circle cx="342" cy="96" r="3.5" fill="#ff5f56"/>
+        <circle cx="353" cy="96" r="3.5" fill="#ffbd2e"/>
+        <circle cx="364" cy="96" r="3.5" fill="#27c93f"/>
+        <text x="340" y="118" font-family="SF Mono,monospace" font-size="10" fill="#a6e3a1">$ </text><text x="354" y="118" font-family="SF Mono,monospace" font-size="10" fill="#cdd6f4">ls 文档/</text>
+        <text x="340" y="132" font-family="SF Mono,monospace" font-size="10" fill="#89b4fa">方案.docx  数据.xlsx</text>
+        <text x="340" y="148" font-family="SF Mono,monospace" font-size="10" fill="#a6e3a1">$ </text><text x="354" y="148" font-family="SF Mono,monospace" font-size="10" fill="#f5c2e7">▊</text>
+
+        <text x="425" y="177" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" fill="#6C5CE7" font-weight="600">告诉电脑 → 你要什么</text>
+      </svg>
+    </div>
+    <div class="diagram-caption">两种方式做的是同一件事——只是交互方式不同</div>
+
+    <p>听起来命令行很可怕？其实它<strong>更接近自然语言</strong>。想想看：</p>
+    <ul>
+      <li>图形界面：你得知道按钮在哪，菜单在哪，记住一堆操作路径</li>
+      <li>命令行：你直接说"打开文档文件夹"、"列出所有文件"——说什么做什么</li>
+    </ul>
+    <p>而 Claude Code 更进一步——你甚至不需要记命令，<strong>直接用中文告诉它你想做什么</strong>，它会翻译成电脑能听懂的指令。</p>
+  </div>
+
+  <!-- 本地 vs 云端 -->
+  <div class="card">
+    <h3>🏠 本地 vs 云端</h3>
+
+    <div class="diagram">
+      <svg width="520" height="200" viewBox="0 0 520 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Local -->
+        <rect x="20" y="30" width="180" height="140" rx="12" fill="#00b894" fill-opacity="0.05" stroke="#00b894" stroke-width="1.2"/>
+        <text x="110" y="58" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="13" font-weight="700" fill="#00b894">🏠 你的电脑（本地）</text>
+        <text x="110" y="90" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" fill="#666">你的文件都在这里</text>
+        <text x="110" y="108" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" fill="#666">只有你能看到</text>
+        <rect x="55" y="122" width="110" height="28" rx="6" fill="#00b894" fill-opacity="0.1"/>
+        <text x="110" y="140" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" fill="#00b894">Claude Code 在这里运行</text>
+
+        <!-- Arrow -->
+        <line x1="210" y1="100" x2="300" y2="100" stroke="#ddd" stroke-width="1.5" stroke-dasharray="5,4"/>
+        <polygon points="298,95 308,100 298,105" fill="#ddd"/>
+        <text x="255" y="88" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#999">发送问题</text>
+        <text x="255" y="118" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#999">返回答案</text>
+        <polygon points="212,95 202,100 212,105" fill="#ddd"/>
+
+        <!-- Cloud -->
+        <rect x="310" y="30" width="190" height="140" rx="12" fill="#0984e3" fill-opacity="0.05" stroke="#0984e3" stroke-width="1.2"/>
+        <text x="405" y="58" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="13" font-weight="700" fill="#0984e3">☁️ Anthropic 云端</text>
+        <text x="405" y="90" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" fill="#666">Claude 的"大脑"在这里</text>
+        <text x="405" y="108" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" fill="#666">负责思考和回答</text>
+        <rect x="345" y="122" width="120" height="28" rx="6" fill="#0984e3" fill-opacity="0.1"/>
+        <text x="405" y="140" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" fill="#0984e3">不存储你的文件</text>
+      </svg>
+    </div>
+    <div class="diagram-caption">Claude Code 在本地运行，但调用云端的 AI 能力来"思考"</div>
+
+    <div class="analogy"><strong>类比：</strong>本地 = 你家书房（私密，你说了算），云端 = 公共图书馆（随时随地能用，但东西是共享的）。</div>
+
+    <p>关于隐私，你需要知道的是：</p>
+    <ul>
+      <li>Claude Code 运行在<strong>你的电脑上</strong>，你的文件不会被上传到云端</li>
+      <li>它的"思考能力"来自云端的 AI 模型——你的问题会被发送过去，但<strong>文件本身留在本地</strong></li>
+      <li>就像你打电话问朋友一个问题：你告诉了他问题，但你桌上的文件并没有寄给他</li>
+    </ul>
+  </div>
+
+  <!-- 路径 -->
+  <div class="card">
+    <h3>📍 路径——文件的"门牌号"</h3>
+    <p>每个文件在电脑里都有一个唯一的"地址"，叫做<strong>路径（path）</strong>。</p>
+
+    <div class="diagram">
+      <svg width="500" height="120" viewBox="0 0 500 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Path breakdown -->
+        <rect x="10" y="18" width="480" height="38" rx="8" fill="#1e1e2e"/>
+        <text x="250" y="42" text-anchor="middle" font-family="SF Mono,monospace" font-size="13" fill="#cdd6f4">/Users/小明/Documents/工作/报告.docx</text>
+
+        <!-- Arrows and labels -->
+        <line x1="50" y1="56" x2="50" y2="72" stroke="#6C5CE7" stroke-width="1.2"/>
+        <text x="50" y="88" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#6C5CE7">根目录</text>
+        <text x="50" y="101" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#999">（起点）</text>
+
+        <line x1="130" y1="56" x2="130" y2="72" stroke="#0984e3" stroke-width="1.2"/>
+        <text x="130" y="88" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#0984e3">用户名</text>
+
+        <line x1="240" y1="56" x2="240" y2="72" stroke="#00b894" stroke-width="1.2"/>
+        <text x="240" y="88" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#00b894">文档文件夹</text>
+
+        <line x1="340" y1="56" x2="340" y2="72" stroke="#e17055" stroke-width="1.2"/>
+        <text x="340" y="88" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#e17055">子文件夹</text>
+
+        <line x1="430" y1="56" x2="430" y2="72" stroke="#e84393" stroke-width="1.2"/>
+        <text x="430" y="88" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#e84393">文件名</text>
+      </svg>
+    </div>
+    <div class="diagram-caption">路径就像门牌号：小区 / 楼号 / 单元 / 房间号</div>
+
+    <p>路径用 <code>/</code>（斜杠）分隔每一层。当你在 Finder（文件管理器）里点击进入"文档" → "工作" → 看到"报告.docx"时，你其实就是在沿着这个路径一层层走。</p>
+
+    <div class="tip"><strong>小贴士：</strong>不用记住路径怎么写。当你用 Claude Code 时，直接说"帮我看看桌面上的那个 Excel 文件"，它会自动找到对应的路径。</div>
+  </div>
+
+  <!-- 安装 -->
+  <div class="card">
+    <h3>📦 "安装"到底在做什么</h3>
+    <p>很多人对"安装"有神秘感。其实安装一个程序，本质上就是三件事：</p>
+    <ul>
+      <li><strong>下载</strong>：把一堆文件从网上搬到你的电脑</li>
+      <li><strong>放置</strong>：把这些文件放到约定好的位置</li>
+      <li><strong>注册</strong>：告诉系统"这里有个新工具可以用了"</li>
+    </ul>
+    <p>不同类型的"程序"其实是同一个东西，只是长相不同：</p>
+    <table class="compare-table">
+      <tr><th>名称</th><th>特点</th><th>例子</th></tr>
+      <tr><td><strong>应用程序</strong></td><td>有图形界面，双击打开</td><td>微信、Word、Chrome</td></tr>
+      <tr><td><strong>命令行工具</strong></td><td>没有界面，在终端用文字操作</td><td>git、node、claude</td></tr>
+    </table>
+    <p style="margin-top: 0.8rem;">Claude Code 是一个<strong>命令行工具</strong>——没有图标可以双击，而是在终端里输入 <code>claude</code> 来启动。</p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     Part 1 准备工作
+     ═══════════════════════════════════════ -->
+<section class="part" id="part1">
+  <div class="part-label">Part 1</div>
+  <h2>准备工作</h2>
+  <p class="part-desc">最小步骤把环境跑起来。跟着做一遍，10 分钟搞定。遇到问题不要慌——每一步我都会告诉你可能碰到什么、怎么处理。</p>
+
+  <div class="card">
+    <h3>Step 1：打开终端</h3>
+    <p>终端就是那个"可以打字跟电脑对话"的窗口。Mac 上有好几种打开方式：</p>
+
+    <div class="diagram">
+      <svg width="480" height="160" viewBox="0 0 480 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Method 1 -->
+        <rect x="10" y="10" width="140" height="140" rx="12" fill="#6C5CE7" fill-opacity="0.04" stroke="#6C5CE7" stroke-width="1"/>
+        <text x="80" y="40" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="12" font-weight="600" fill="#6C5CE7">方法一（推荐）</text>
+        <text x="80" y="66" text-anchor="middle" font-size="24">⌘ + 空格</text>
+        <text x="80" y="90" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" fill="#666">输入"终端"</text>
+        <text x="80" y="106" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" fill="#666">按回车</text>
+        <rect x="38" y="118" width="84" height="22" rx="4" fill="#6C5CE7" fill-opacity="0.1"/>
+        <text x="80" y="133" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#6C5CE7">最快捷</text>
+
+        <!-- Method 2 -->
+        <rect x="170" y="10" width="140" height="140" rx="12" fill="#0984e3" fill-opacity="0.04" stroke="#0984e3" stroke-width="1"/>
+        <text x="240" y="40" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="12" font-weight="600" fill="#0984e3">方法二</text>
+        <text x="240" y="66" text-anchor="middle" font-size="24">📂</text>
+        <text x="240" y="90" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" fill="#666">Finder → 应用程序</text>
+        <text x="240" y="106" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" fill="#666">→ 实用工具 → 终端</text>
+        <rect x="198" y="118" width="84" height="22" rx="4" fill="#0984e3" fill-opacity="0.1"/>
+        <text x="240" y="133" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#0984e3">好找</text>
+
+        <!-- Method 3 -->
+        <rect x="330" y="10" width="140" height="140" rx="12" fill="#00b894" fill-opacity="0.04" stroke="#00b894" stroke-width="1"/>
+        <text x="400" y="40" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="12" font-weight="600" fill="#00b894">方法三</text>
+        <text x="400" y="66" text-anchor="middle" font-size="24">🖥</text>
+        <text x="400" y="90" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" fill="#666">Launchpad 里搜索</text>
+        <text x="400" y="106" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" fill="#666">"Terminal"</text>
+        <rect x="358" y="118" width="84" height="22" rx="4" fill="#00b894" fill-opacity="0.1"/>
+        <text x="400" y="133" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#00b894">直觉</text>
+      </svg>
+    </div>
+
+    <p>打开后你会看到一个窗口，里面有一行文字和一个闪烁的光标。这就是命令行——<strong>你的新工作台</strong>。</p>
+
+    <div class="diagram">
+      <svg width="520" height="180" viewBox="0 0 520 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Terminal window -->
+        <rect x="10" y="10" width="500" height="160" rx="10" fill="#1e1e2e" stroke="#3a3a4e" stroke-width="1"/>
+        <!-- Title bar -->
+        <rect x="10" y="10" width="500" height="30" rx="10" fill="#2a2a3e"/>
+        <rect x="10" y="30" width="500" height="10" fill="#2a2a3e"/>
+        <circle cx="30" cy="25" r="5.5" fill="#ff5f56"/>
+        <circle cx="48" cy="25" r="5.5" fill="#ffbd2e"/>
+        <circle cx="66" cy="25" r="5.5" fill="#27c93f"/>
+        <text x="260" y="29" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" fill="#888">终端 — zsh</text>
+
+        <!-- Content -->
+        <text x="30" y="66" font-family="SF Mono,Menlo,monospace" font-size="13" fill="#cdd6f4">Last login: Thu Mar 27 09:00:00 on ttys000</text>
+        <text x="30" y="100" font-family="SF Mono,Menlo,monospace" font-size="13">
+          <tspan fill="#a6e3a1">xiaoming@MacBook</tspan><tspan fill="#cdd6f4"> ~ </tspan><tspan fill="#89b4fa">%</tspan><tspan fill="#f5c2e7"> ▊</tspan>
+        </text>
+
+        <!-- Annotations -->
+        <line x1="178" y1="105" x2="178" y2="135" stroke="#6C5CE7" stroke-width="1" stroke-dasharray="3,3"/>
+        <text x="178" y="150" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#6C5CE7">你的用户名</text>
+
+        <line x1="252" y1="105" x2="252" y2="125" stroke="#0984e3" stroke-width="1" stroke-dasharray="3,3"/>
+        <text x="252" y="140" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#0984e3">当前位置（~=主目录）</text>
+
+        <line x1="300" y1="105" x2="300" y2="135" stroke="#e84393" stroke-width="1" stroke-dasharray="3,3"/>
+        <text x="328" y="150" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#e84393">光标（等你输入）</text>
+      </svg>
+    </div>
+    <div class="diagram-caption">终端打开后的样子——别被它吓到，它只是在等你说话</div>
+
+    <div class="tip"><strong>小贴士：</strong>终端窗口的颜色、字体可能跟图不一样，这完全正常。重要的是你看到了那个闪烁的光标——它代表"我准备好了，等你输入"。</div>
+  </div>
+
+  <div class="card">
+    <h3>Step 2：认识三个最基础的命令</h3>
+    <p>在命令行里，你只需要记住三个命令就能"走路"。就像现实生活中你只需要知道"我在哪"、"周围有什么"、"去那里"：</p>
+
+    <div class="code-block">
+<span class="comment"># 1. 我在哪？（Print Working Directory = 打印当前目录）</span>
+<span class="prompt">$</span> pwd
+<span class="output">/Users/xiaoming</span>
+<span class="comment"># 就像问"我现在在几楼？" → "你在家目录"</span>
+
+<span class="comment"># 2. 这里有什么？（List = 列出内容）</span>
+<span class="prompt">$</span> ls
+<span class="output">Desktop    Documents    Downloads    Pictures</span>
+<span class="comment"># 就像打开抽屉看看里面有什么</span>
+
+<span class="comment"># 3. 去某个地方（Change Directory = 切换目录）</span>
+<span class="prompt">$</span> cd Documents
+<span class="comment"># 就像走进"文档"这个房间</span>
+
+<span class="comment"># 现在再看看自己在哪</span>
+<span class="prompt">$</span> pwd
+<span class="output">/Users/xiaoming/Documents</span>
+<span class="comment"># 成功！你已经在文档文件夹里了</span>
+
+<span class="comment"># 想回上一层？</span>
+<span class="prompt">$</span> cd ..
+<span class="comment"># 两个点 = 上一级。就像从房间走回走廊</span>
+    </div>
+
+    <table class="compare-table" style="margin-top: 1rem;">
+      <tr><th>命令</th><th>全称</th><th>作用</th><th>生活类比</th></tr>
+      <tr><td><code>pwd</code></td><td>Print Working Directory</td><td>显示当前位置</td><td>"我在几楼？"</td></tr>
+      <tr><td><code>ls</code></td><td>List</td><td>列出当前文件夹内容</td><td>"这个房间里有什么？"</td></tr>
+      <tr><td><code>cd 目标</code></td><td>Change Directory</td><td>进入某个文件夹</td><td>"走到那个房间"</td></tr>
+      <tr><td><code>cd ..</code></td><td>—</td><td>返回上一级</td><td>"退出去，回走廊"</td></tr>
+    </table>
+
+    <div class="warning"><strong>别担心：</strong>一旦你开始用 Claude Code，这些命令你几乎不需要手动输入。因为 Claude 会帮你做这些事。但理解它们在做什么，能让你更好地跟 Claude 配合。</div>
+  </div>
+
+  <div class="card">
+    <h3>Step 3：安装必备工具</h3>
+    <p>Claude Code 需要一个叫 <strong>Node.js</strong> 的运行环境。你可以理解为：Node.js 是"基础设施"，Claude Code 是"建在上面的应用"。</p>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>检查是否已有 Node.js</h4>
+        <p>在终端输入 <code>node --version</code>。如果显示版本号（如 v18.17.0），说明已安装，跳到第 3 步。如果提示"command not found"，继续第 2 步。</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>安装 Node.js</h4>
+        <p>访问 <strong>nodejs.org</strong>，下载 LTS 版本（长期支持版），双击安装包，一路"下一步"。安装完后关掉终端再重新打开。</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h4>安装 Claude Code</h4>
+      </div>
+    </div>
+
+    <div class="code-block">
+<span class="comment"># 一行命令搞定</span>
+<span class="prompt">$</span> npm install -g @anthropic-ai/claude-code
+
+<span class="comment"># 安装完验证一下</span>
+<span class="prompt">$</span> claude --version
+<span class="output">claude-code v1.x.x</span>
+<span class="comment"># 看到版本号就说明安装成功了！</span>
+    </div>
+
+    <div class="tip"><strong>npm 是什么？</strong>它是 Node.js 自带的"应用商店"。<code>npm install -g</code> 就是在说"从应用商店下载并全局安装"。<code>-g</code> 表示全局（global），意味着在任何文件夹都能用。</div>
+  </div>
+
+  <div class="card">
+    <h3>Step 4：第一次启动 Claude Code</h3>
+
+    <div class="code-block">
+<span class="comment"># 先进入你想工作的文件夹</span>
+<span class="prompt">$</span> cd ~/Documents
+
+<span class="comment"># 启动 Claude Code</span>
+<span class="prompt">$</span> claude
+    </div>
+
+    <p>第一次启动会要求你登录 Anthropic 账号。按提示操作即可（通常会打开浏览器让你授权）。</p>
+
+    <p>登录成功后，你会看到这样的界面：</p>
+
+    <div class="diagram">
+      <svg width="520" height="200" viewBox="0 0 520 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="10" y="10" width="500" height="180" rx="10" fill="#1e1e2e" stroke="#3a3a4e" stroke-width="1"/>
+        <rect x="10" y="10" width="500" height="30" rx="10" fill="#2a2a3e"/>
+        <rect x="10" y="30" width="500" height="10" fill="#2a2a3e"/>
+        <circle cx="30" cy="25" r="5.5" fill="#ff5f56"/>
+        <circle cx="48" cy="25" r="5.5" fill="#ffbd2e"/>
+        <circle cx="66" cy="25" r="5.5" fill="#27c93f"/>
+        <text x="260" y="29" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" fill="#888">Claude Code</text>
+
+        <text x="30" y="62" font-family="SF Mono,monospace" font-size="12" fill="#89b4fa">╭──────────────────────────────────────────╮</text>
+        <text x="30" y="80" font-family="SF Mono,monospace" font-size="12" fill="#89b4fa">│</text>
+        <text x="52" y="80" font-family="SF Mono,monospace" font-size="12" fill="#f9e2af">  Claude Code  </text>
+        <text x="200" y="80" font-family="SF Mono,monospace" font-size="12" fill="#6c7086">v1.0.30</text>
+        <text x="470" y="80" font-family="SF Mono,monospace" font-size="12" fill="#89b4fa">│</text>
+        <text x="30" y="98" font-family="SF Mono,monospace" font-size="12" fill="#89b4fa">╰──────────────────────────────────────────╯</text>
+
+        <text x="30" y="124" font-family="SF Mono,monospace" font-size="12" fill="#6c7086">  Working directory: ~/Documents</text>
+
+        <text x="30" y="154" font-family="SF Mono,monospace" font-size="12" fill="#a6e3a1">  You:</text>
+        <text x="90" y="154" font-family="SF Mono,monospace" font-size="12" fill="#f5c2e7">▊</text>
+
+        <text x="30" y="178" font-family="SF Mono,monospace" font-size="10" fill="#6c7086">  Type your message... (Ctrl+C to exit)</text>
+      </svg>
+    </div>
+    <div class="diagram-caption">启动成功！看到 "You:" 提示符就可以开始对话了</div>
+
+    <p>现在你可以直接用中文跟 Claude 说话了。试试输入：<code>你好，你能做什么？</code></p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     Part 2 基础操作
+     ═══════════════════════════════════════ -->
+<section class="part" id="part2">
+  <div class="part-label">Part 2</div>
+  <h2>开始使用 Claude Code</h2>
+  <p class="part-desc">环境搭好了。现在学会跟 Claude Code 协作，理解它在做什么——这比背命令重要得多。</p>
+
+  <div class="card">
+    <h3>💬 让 Claude 帮你做第一件事</h3>
+    <p>不需要学特殊语法，直接用中文说你想做什么。比如：</p>
+
+    <div class="code-block">
+<span class="prompt">You:</span> <span class="highlight">帮我看看这个文件夹里有什么文件，按类型整理一下告诉我</span>
+
+<span class="prompt">Claude:</span> 我来看看当前目录的内容...
+
+<span class="comment">[Claude 调用了 ls 命令，读取了文件列表]</span>
+
+当前文件夹包含以下内容：
+
+📁 文件夹（3个）：工作项目、个人照片、学习资料
+📄 文档（5个）：简历.docx、方案.pdf、会议记录.md...
+🖼 图片（2个）：截图1.png、logo.jpg
+    </div>
+    <p>注意：Claude 不只是在"猜"——它真的去<strong>执行了命令</strong>，读取了你的文件系统。</p>
+  </div>
+
+  <div class="card">
+    <h3>🔍 理解 Claude 在做什么</h3>
+    <p>Claude Code 和普通 AI 聊天的最大区别：<strong>它能真正操作你的电脑</strong>。它做的每一步都会告诉你。</p>
+
+    <div class="diagram">
+      <svg width="520" height="280" viewBox="0 0 520 280" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- You -->
+        <rect x="10" y="30" width="100" height="44" rx="22" fill="#6C5CE7" fill-opacity="0.1" stroke="#6C5CE7" stroke-width="1.5"/>
+        <text x="60" y="57" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="14" font-weight="700" fill="#6C5CE7">你</text>
+
+        <!-- Arrow 1 -->
+        <line x1="110" y1="52" x2="170" y2="52" stroke="#ddd" stroke-width="1.5"/>
+        <polygon points="168,47 178,52 168,57" fill="#ddd"/>
+        <text x="140" y="42" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="9" fill="#999">说需求</text>
+
+        <!-- Claude -->
+        <rect x="178" y="20" width="160" height="64" rx="12" fill="#6C5CE7" fill-opacity="0.06" stroke="#6C5CE7" stroke-width="1.5"/>
+        <text x="258" y="45" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="14" font-weight="700" fill="#6C5CE7">Claude</text>
+        <text x="258" y="65" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" fill="#999">理解 → 拆解 → 执行</text>
+
+        <!-- Four actions -->
+        <line x1="218" y1="84" x2="80" y2="130" stroke="#ddd" stroke-width="1.2"/>
+        <line x1="238" y1="84" x2="200" y2="130" stroke="#ddd" stroke-width="1.2"/>
+        <line x1="278" y1="84" x2="320" y2="130" stroke="#ddd" stroke-width="1.2"/>
+        <line x1="298" y1="84" x2="440" y2="130" stroke="#ddd" stroke-width="1.2"/>
+
+        <!-- Read -->
+        <rect x="20" y="130" width="120" height="80" rx="10" fill="#0984e3" fill-opacity="0.06" stroke="#0984e3" stroke-width="1.2"/>
+        <text x="80" y="157" text-anchor="middle" font-size="20">👁</text>
+        <text x="80" y="176" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="12" font-weight="600" fill="#0984e3">读文件</text>
+        <text x="80" y="198" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#666">查看你的文档内容</text>
+
+        <!-- Edit -->
+        <rect x="155" y="130" width="120" height="80" rx="10" fill="#00b894" fill-opacity="0.06" stroke="#00b894" stroke-width="1.2"/>
+        <text x="215" y="157" text-anchor="middle" font-size="20">✏️</text>
+        <text x="215" y="176" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="12" font-weight="600" fill="#00b894">改文件</text>
+        <text x="215" y="198" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#666">修改文档、代码</text>
+
+        <!-- Run -->
+        <rect x="290" y="130" width="120" height="80" rx="10" fill="#e17055" fill-opacity="0.06" stroke="#e17055" stroke-width="1.2"/>
+        <text x="350" y="157" text-anchor="middle" font-size="20">⚡</text>
+        <text x="350" y="176" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="12" font-weight="600" fill="#e17055">跑命令</text>
+        <text x="350" y="198" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#666">安装工具、执行脚本</text>
+
+        <!-- Search -->
+        <rect x="390" y="130" width="120" height="80" rx="10" fill="#e84393" fill-opacity="0.06" stroke="#e84393" stroke-width="1.2"/>
+        <text x="450" y="157" text-anchor="middle" font-size="20">🔎</text>
+        <text x="450" y="176" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="12" font-weight="600" fill="#e84393">搜索</text>
+        <text x="450" y="198" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#666">在文件里找内容</text>
+
+        <!-- Result arrow -->
+        <line x1="258" y1="210" x2="258" y2="240" stroke="#ddd" stroke-width="1.2"/>
+        <polygon points="253,238 258,248 263,238" fill="#ddd"/>
+
+        <rect x="158" y="248" width="200" height="28" rx="8" fill="#6C5CE7" fill-opacity="0.08"/>
+        <text x="258" y="267" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="12" fill="#6C5CE7" font-weight="600">把结果告诉你，等你下一步指示</text>
+      </svg>
+    </div>
+    <div class="diagram-caption">Claude Code 的工作方式：理解你的需求 → 用工具执行 → 报告结果</div>
+
+    <p>每次 Claude 使用一个工具，你都能在界面上看到它做了什么。这意味着：</p>
+    <ul>
+      <li>你可以<strong>监督</strong>它的每一步操作</li>
+      <li>它不会偷偷做你不知道的事</li>
+      <li>如果哪一步不对，你可以立刻纠正</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>🔐 权限确认——Claude 在问你"可以吗"</h3>
+    <p>当 Claude 要做可能有影响的操作（修改文件、执行命令），它会先问你：</p>
+
+    <div class="code-block">
+<span class="prompt">Claude:</span> 我需要修改 报告.docx 的内容，把第三段改为...
+<span class="highlight">Allow this edit? (y/n)</span>
+
+<span class="comment"># y = 同意（yes）</span>
+<span class="comment"># n = 拒绝（no），Claude 会换个方案</span>
+    </div>
+
+    <div class="analogy"><strong>类比：</strong>就像你的助理拿着笔走到你面前说——"我准备把这段改了，你看行吗？"你点头它才动笔。这是一个<strong>安全机制</strong>，确保 Claude 不会做你不想做的事。</div>
+
+    <p>一般来说：</p>
+    <ul>
+      <li><strong>读文件</strong>：通常自动允许（只是看看，不影响任何东西）</li>
+      <li><strong>改文件</strong>：需要你确认（会改变你的文件内容）</li>
+      <li><strong>执行命令</strong>：需要你确认（可能安装东西或执行操作）</li>
+    </ul>
+
+    <div class="tip"><strong>随着信任积累：</strong>你可以在设置里把某些操作设为"自动允许"，这样 Claude 就不用每次都问你了。但刚开始建议保持手动确认，先熟悉它的行为模式。</div>
+  </div>
+
+  <div class="card">
+    <h3>📂 文件夹 = 你的工作空间</h3>
+    <p>这是一个很重要的概念：<strong>你在哪个文件夹启动 Claude，它就主要看那个文件夹里的东西</strong>。</p>
+
+    <div class="diagram">
+      <svg width="480" height="140" viewBox="0 0 480 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Bad -->
+        <rect x="10" y="10" width="220" height="120" rx="12" fill="#e17055" fill-opacity="0.04" stroke="#e17055" stroke-width="1"/>
+        <text x="120" y="38" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="12" font-weight="700" fill="#e17055">😕 在主目录启动</text>
+        <text x="120" y="62" text-anchor="middle" font-family="SF Mono,monospace" font-size="11" fill="#666">cd ~</text>
+        <text x="120" y="78" text-anchor="middle" font-family="SF Mono,monospace" font-size="11" fill="#666">claude</text>
+        <text x="120" y="104" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" fill="#999">Claude 看到所有文件</text>
+        <text x="120" y="120" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" fill="#999">不知道你要做什么</text>
+
+        <!-- Good -->
+        <rect x="250" y="10" width="220" height="120" rx="12" fill="#00b894" fill-opacity="0.04" stroke="#00b894" stroke-width="1"/>
+        <text x="360" y="38" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="12" font-weight="700" fill="#00b894">✅ 在项目文件夹启动</text>
+        <text x="360" y="62" text-anchor="middle" font-family="SF Mono,monospace" font-size="11" fill="#666">cd ~/Documents/我的项目</text>
+        <text x="360" y="78" text-anchor="middle" font-family="SF Mono,monospace" font-size="11" fill="#666">claude</text>
+        <text x="360" y="104" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" fill="#999">Claude 聚焦于项目</text>
+        <text x="360" y="120" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" fill="#999">更懂你的上下文</text>
+      </svg>
+    </div>
+
+    <p>所以养成习惯：<strong>先 cd 到你要工作的文件夹，再启动 claude</strong>。这就像走进办公室再开始工作，而不是站在大门口工作。</p>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     Part 3 协作层级
+     ═══════════════════════════════════════ -->
+<section class="part" id="part3">
+  <div class="part-label">Part 3 — 核心认知</div>
+  <h2>人与 AI 的协作层级</h2>
+  <p class="part-desc">这是整个教程最有价值的部分。不是教操作，是教<strong>认知</strong>。你和 AI 之间的协作深度，决定了你能从 AI 身上获得多大的价值。这里有 6 个层级——每一层的跨越都是认知跃迁，不是技术升级。</p>
+
+  <!-- Level progression diagram -->
+  <div class="diagram">
+    <svg width="560" height="320" viewBox="0 0 560 320" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Staircase -->
+      <rect x="30" y="260" width="80" height="40" rx="4" fill="#00b894" fill-opacity="0.15" stroke="#00b894" stroke-width="1.5"/>
+      <text x="70" y="284" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" font-weight="600" fill="#00b894">L0 工具</text>
+
+      <rect x="115" y="216" width="80" height="84" rx="4" fill="#0984e3" fill-opacity="0.12" stroke="#0984e3" stroke-width="1.5"/>
+      <text x="155" y="240" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" font-weight="600" fill="#0984e3">L1 对话</text>
+
+      <rect x="200" y="172" width="80" height="128" rx="4" fill="#6C5CE7" fill-opacity="0.12" stroke="#6C5CE7" stroke-width="1.5"/>
+      <text x="240" y="196" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" font-weight="600" fill="#6C5CE7">L2 协作</text>
+
+      <rect x="285" y="128" width="80" height="172" rx="4" fill="#e17055" fill-opacity="0.12" stroke="#e17055" stroke-width="1.5"/>
+      <text x="325" y="152" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" font-weight="600" fill="#e17055">L3 委托</text>
+
+      <rect x="370" y="84" width="80" height="216" rx="4" fill="#e84393" fill-opacity="0.12" stroke="#e84393" stroke-width="1.5"/>
+      <text x="410" y="108" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" font-weight="600" fill="#e84393">L4 系统</text>
+
+      <rect x="455" y="40" width="80" height="260" rx="4" fill="url(#grad1)" fill-opacity="0.12" stroke="#6C5CE7" stroke-width="1.5"/>
+      <text x="495" y="64" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" font-weight="600" fill="#6C5CE7">L5 共生</text>
+
+      <defs>
+        <linearGradient id="grad1" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#6C5CE7"/>
+          <stop offset="100%" stop-color="#e84393"/>
+        </linearGradient>
+      </defs>
+
+      <!-- Labels on right -->
+      <text x="70" y="20" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="12" fill="#999">← 大部分人在这</text>
+      <line x1="70" y1="24" x2="70" y2="255" stroke="#ccc" stroke-width="1" stroke-dasharray="3,4"/>
+
+      <text x="400" y="20" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="12" fill="#6C5CE7">← 这个教程带你到这</text>
+      <line x1="400" y1="24" x2="400" y2="79" stroke="#6C5CE7" stroke-width="1" stroke-dasharray="3,4"/>
+
+      <!-- Y axis label -->
+      <text x="15" y="160" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#999" transform="rotate(-90, 15, 160)">你获得的价值 →</text>
+    </svg>
+  </div>
+  <div class="diagram-caption">每上一层，你从 AI 获得的价值呈指数级增长</div>
+
+  <div class="levels">
+
+    <div class="level-card">
+      <div class="level-badge">Level 0 · 工具模式</div>
+      <h3>一次性问答</h3>
+      <div class="example">"帮我写一封邮件" → 拿到结果 → 结束</div>
+      <div class="desc">这是最基础的使用方式：你问一个问题，AI 给一个答案。像用搜索引擎一样——输入关键词，得到结果。大部分人使用 AI 停留在这个层级。</div>
+      <ul>
+        <li>把 AI 当搜索引擎或模板生成器</li>
+        <li>一次输入，一次输出，用完即走</li>
+        <li>结果质量完全取决于你的 prompt（提问方式）</li>
+        <li>AI 对你毫无了解——每次都是陌生人</li>
+      </ul>
+      <div class="key-insight"><strong>瓶颈：</strong>你必须一次把需求说清楚，但现实中很少有人能做到。结果往往不满意，然后归结为"AI 不够聪明"。</div>
+    </div>
+
+    <div class="level-card">
+      <div class="level-badge">Level 1 · 对话模式</div>
+      <h3>多轮打磨</h3>
+      <div class="example">"帮我写一封邮件" → "语气再正式一点" → "加上这个背景" → 满意</div>
+      <div class="desc">你开始意识到 AI 可以被"调教"。通过多轮反馈，逐步逼近你想要的结果。这是一个重要的认知跳跃——从"一锤子买卖"到"渐进式迭代"。</div>
+      <ul>
+        <li>理解了 AI 的输出可以被迭代改进</li>
+        <li>学会用反馈来引导 AI 的方向</li>
+        <li>每次对话的质量明显提升</li>
+        <li>但每个新话题还是从零开始</li>
+      </ul>
+      <div class="key-insight"><strong>关键认知：</strong>你不需要一次说清楚。可以先给一个大方向，然后通过反馈不断调整。好的结果是"对话"出来的，不是"问"出来的。</div>
+    </div>
+
+    <div class="level-card">
+      <div class="level-badge">Level 2 · 协作模式</div>
+      <h3>先讨论后执行</h3>
+      <div class="example">"我想做X，但还没想清楚" → 一起讨论 → 对齐方案 → 制定计划 → 逐步执行</div>
+      <div class="desc">这是一个巨大的认知跃迁。你开始把 AI 从"执行者"升级为"思考伙伴"。在动手之前，先跟 AI 讨论——让它帮你理清思路、发现盲点、对齐方向，<strong>然后</strong>再让它去做。</div>
+      <ul>
+        <li>AI 不只是执行者，还是你的思考伙伴</li>
+        <li>先用 AI 帮自己理清思路（"想"），再让 AI 执行（"做"）</li>
+        <li>方案质量大幅提升——因为想清楚了再做</li>
+        <li>开始出现"人机配合"的感觉</li>
+      </ul>
+      <div class="key-insight"><strong>关键认知：</strong>把"想"和"做"分开。AI 两个都能帮——但让它帮你想，往往比让它帮你做更有价值。</div>
+    </div>
+
+    <div class="level-card">
+      <div class="level-badge">Level 3 · 委托模式</div>
+      <h3>目标驱动</h3>
+      <div class="example">"我的目标是X" → AI 自己拆解计划 → 自己执行 → 自己验证 → 汇报结果</div>
+      <div class="desc">你只给目标和约束条件，不管过程。AI 自己决定怎么做、怎么拆分、先做什么后做什么。你的角色从"操作者"变成了"Review 者"——看结果，给反馈。</div>
+      <ul>
+        <li>你只定义"做什么"和"不能做什么"，不管"怎么做"</li>
+        <li>AI 自主决策执行路径，你不用 micromanage</li>
+        <li>你的时间从"做事"释放出来，用于"判断和决策"</li>
+        <li>需要学会 review —— 看得懂结果，能判断好坏</li>
+      </ul>
+      <div class="key-insight"><strong>关键认知：</strong>信任但验证。让 AI 自由发挥，但保持对结果的审核。学会做"甲方"——不是什么都自己干，而是能判断"做得好不好"。</div>
+    </div>
+
+    <div class="level-card">
+      <div class="level-badge">Level 4 · 系统模式</div>
+      <h3>架构师思维</h3>
+      <div class="example">设计定时任务、触发规则、多 Agent 协作、自动化工作流——AI 按规则持续运转</div>
+      <div class="desc">你不再是"用 AI 做一件事"，而是在设计一套系统，让 AI 作为系统的一部分自动运转。就像写了一套流水线规则——原材料进来，成品出去，你不用每次都站在旁边。</div>
+      <ul>
+        <li>你在设计系统，不是在做具体任务</li>
+        <li>AI 是系统的一个组件，按规则持续运转</li>
+        <li>一次设计，持续产出——效率呈指数级增长</li>
+        <li>开始理解"可复用"和"自动化"的力量</li>
+      </ul>
+      <div class="key-insight"><strong>关键认知：</strong>从"用 AI 做事"到"让 AI 替你运转"。你的价值不是做事，是设计让 AI 做事的系统。</div>
+    </div>
+
+    <div class="level-card">
+      <div class="level-badge">Level 5 · 共生模式</div>
+      <h3>你 + AI 操作系统</h3>
+      <div class="example">AI 深度嵌入你的知识管理、任务管理、决策支持系统，成为你的"外脑"</div>
+      <div class="desc">AI 不再是一个外部工具，而是你个人操作系统的核心组件。它了解你的目标、原则、偏好、历史决策，不只执行任务，还主动提供洞察和建议。你们在共同进化——你让 AI 变得更强，AI 也让你变得更强。</div>
+      <ul>
+        <li>AI 了解你的完整上下文——目标、原则、偏好、工作方式</li>
+        <li>不只执行任务，还主动发现问题、提供建议</li>
+        <li>你的知识和经验通过 AI 被结构化、放大、持久化</li>
+        <li>你和 AI 形成正反馈循环——越用越强</li>
+      </ul>
+      <div class="key-insight"><strong>关键认知：</strong>AI 不是工具，是协作者——你们在共同进化。你的天花板不再是"一个人能做多少"，而是"人+AI 系统能做多少"。</div>
+    </div>
+
+  </div>
+
+  <div class="callout" style="margin-top: 2.5rem;">
+    <p>每一层的跨越不是技术问题，<br>是<span style="color: var(--accent);">认知跃迁</span>。</p>
+    <div class="attribution">市面上的教程教 Level 0-1 的操作。这份教程教你 Level 2-5 的认知。</div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     Part 4 配置体系
+     ═══════════════════════════════════════ -->
+<section class="part" id="part4">
+  <div class="part-label">Part 4</div>
+  <h2>Claude Code 的配置体系</h2>
+  <p class="part-desc">到了 Level 2-3，你会发现一个问题：每次新对话，Claude 都像一个"新来的同事"，啥都不知道。配置体系就是解决这个问题的——让 Claude 从"陌生人"变成"老搭档"。</p>
+
+  <!-- Relationship diagram -->
+  <div class="diagram">
+    <svg width="520" height="300" viewBox="0 0 520 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Center: Claude -->
+      <circle cx="260" cy="150" r="50" fill="#6C5CE7" fill-opacity="0.08" stroke="#6C5CE7" stroke-width="1.5"/>
+      <text x="260" y="145" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="14" font-weight="700" fill="#6C5CE7">Claude</text>
+      <text x="260" y="163" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#999">每次启动</text>
+      <text x="260" y="175" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#999">自动加载 ↓</text>
+
+      <!-- CLAUDE.md -->
+      <line x1="220" y1="108" x2="110" y2="55" stroke="#0984e3" stroke-width="1.2"/>
+      <rect x="20" y="20" width="170" height="70" rx="10" fill="#0984e3" fill-opacity="0.06" stroke="#0984e3" stroke-width="1.2"/>
+      <text x="105" y="45" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="13" font-weight="700" fill="#0984e3">📋 CLAUDE.md</text>
+      <text x="105" y="64" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" fill="#666">员工手册</text>
+      <text x="105" y="80" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#999">规则 · 偏好 · 项目结构</text>
+
+      <!-- Memory -->
+      <line x1="300" y1="108" x2="410" y2="55" stroke="#00b894" stroke-width="1.2"/>
+      <rect x="330" y="20" width="170" height="70" rx="10" fill="#00b894" fill-opacity="0.06" stroke="#00b894" stroke-width="1.2"/>
+      <text x="415" y="45" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="13" font-weight="700" fill="#00b894">🧠 Memory</text>
+      <text x="415" y="64" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" fill="#666">工作笔记本</text>
+      <text x="415" y="80" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#999">角色 · 反馈 · 项目状态</text>
+
+      <!-- Command -->
+      <line x1="220" y1="192" x2="110" y2="240" stroke="#e17055" stroke-width="1.2"/>
+      <rect x="20" y="210" width="170" height="70" rx="10" fill="#e17055" fill-opacity="0.06" stroke="#e17055" stroke-width="1.2"/>
+      <text x="105" y="235" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="13" font-weight="700" fill="#e17055">⚡ Command</text>
+      <text x="105" y="254" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" fill="#666">SOP 清单</text>
+      <text x="105" y="270" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#999">/名称 一键触发流程</text>
+
+      <!-- Skill -->
+      <line x1="300" y1="192" x2="410" y2="240" stroke="#e84393" stroke-width="1.2"/>
+      <rect x="330" y="210" width="170" height="70" rx="10" fill="#e84393" fill-opacity="0.06" stroke="#e84393" stroke-width="1.2"/>
+      <text x="415" y="235" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="13" font-weight="700" fill="#e84393">🎓 Skill</text>
+      <text x="415" y="254" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" fill="#666">专业培训课</text>
+      <text x="415" y="270" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#999">完整领域能力 + 规则</text>
+    </svg>
+  </div>
+  <div class="diagram-caption">四个配置层共同构建了 Claude 对你的"理解"</div>
+
+  <div class="config-grid">
+    <div class="config-card">
+      <div class="config-icon">📋</div>
+      <h3>CLAUDE.md</h3>
+      <div class="subtitle">给 AI 的"员工手册"</div>
+      <p>放在项目文件夹根目录的一个文本文件。Claude 每次启动都会自动读取它。你可以在里面写：</p>
+      <ul style="margin-top: 0.5rem; list-style: none; padding: 0;">
+        <li style="padding: 0.15rem 0; font-size: 0.88rem; color: var(--text-2);">· 你是谁、做什么工作</li>
+        <li style="padding: 0.15rem 0; font-size: 0.88rem; color: var(--text-2);">· 你的项目文件结构</li>
+        <li style="padding: 0.15rem 0; font-size: 0.88rem; color: var(--text-2);">· 你的规则和偏好</li>
+        <li style="padding: 0.15rem 0; font-size: 0.88rem; color: var(--text-2);">· 你希望 Claude 怎么配合</li>
+      </ul>
+      <p style="margin-top: 0.5rem;">越写越详细 → Claude 行为越符合期望。就像一份越来越完善的员工手册——新来的同事按手册做事就能达到 80 分。</p>
+    </div>
+
+    <div class="config-card">
+      <div class="config-icon">🧠</div>
+      <h3>Memory</h3>
+      <div class="subtitle">AI 的"工作笔记本"</div>
+      <p>Claude 在协作过程中自动积累的笔记——你的角色、偏好、反馈、项目进展。每次新会话开始前它都会翻看。</p>
+      <p style="margin-top: 0.5rem;">你也可以主动告诉 Claude"记住这个"。就像你的助理随身带着一个小本子，记着你喜欢什么、不喜欢什么、上次讨论到哪了。协作时间越长，它越"懂你"。</p>
+    </div>
+
+    <div class="config-card">
+      <div class="config-icon">⚡</div>
+      <h3>Command</h3>
+      <div class="subtitle">可复用的指令模板</div>
+      <p>把重复性工作封装成一条指令。比如你每天都要做一个"日报"，可以创建一个 <code>/daily-report</code> command，Claude 就按固定流程帮你生成。</p>
+      <p style="margin-top: 0.5rem;">类比：跟助理说"按上次的格式再写一份"——它已经知道格式、步骤、注意事项。你不用每次重新解释。</p>
+    </div>
+
+    <div class="config-card">
+      <div class="config-icon">🎓</div>
+      <h3>Skill</h3>
+      <div class="subtitle">能力包</div>
+      <p>比 Command 更完整——不只是步骤模板，还包含领域知识、判断规则、输出规范。让 Claude 学会一个"领域能力"。</p>
+      <p style="margin-top: 0.5rem;">类比：Command 是告诉助理"按步骤做"，Skill 是送助理去培训——回来后它能自己判断、灵活应对。</p>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top: 1.2rem;">
+    <h3>四者的关系</h3>
+    <table class="compare-table">
+      <tr><th>配置</th><th>作用</th><th>什么时候用</th><th>类比</th></tr>
+      <tr><td><strong>CLAUDE.md</strong></td><td>定义规则和上下文</td><td>项目开始时写，持续完善</td><td>公司制度</td></tr>
+      <tr><td><strong>Memory</strong></td><td>跨会话记住信息</td><td>自动积累 + 主动保存</td><td>工作日志</td></tr>
+      <tr><td><strong>Command</strong></td><td>封装重复流程</td><td>第二次做同一件事时</td><td>SOP 清单</td></tr>
+      <tr><td><strong>Skill</strong></td><td>封装领域能力</td><td>需要专业判断力时</td><td>培训证书</td></tr>
+    </table>
+
+    <div class="tip" style="margin-top: 1rem;"><strong>起步建议：</strong>先写一份简单的 CLAUDE.md（哪怕只有 3 行），体验一下"Claude 知道你是谁"的感觉。然后在协作中让 Claude 帮你逐步完善。</div>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     Part 5 沉淀工作流
+     ═══════════════════════════════════════ -->
+<section class="part" id="part5">
+  <div class="part-label">Part 5</div>
+  <h2>沉淀你的工作流</h2>
+  <p class="part-desc">这是从"使用者"到"构建者"的跃迁——也是 Level 4 和 Level 5 的基础。不是让你学编程，而是让你学会一个习惯：<strong>做完事情后，把方法留下来</strong>。</p>
+
+  <div class="callout">
+    <p>当你发现自己<strong>第二次</strong>用类似方式解决问题时，<br>就应该把它<span style="color: var(--accent);">沉淀</span>下来。</p>
+    <div class="attribution">第一次是尝试，第二次就是模式</div>
+  </div>
+
+  <!-- Cycle diagram -->
+  <div class="diagram">
+    <svg width="500" height="240" viewBox="0 0 500 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- Step 1 -->
+      <rect x="10" y="40" width="100" height="80" rx="10" fill="#0984e3" fill-opacity="0.06" stroke="#0984e3" stroke-width="1.2"/>
+      <text x="60" y="68" text-anchor="middle" font-size="22">🔨</text>
+      <text x="60" y="90" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="12" font-weight="600" fill="#0984e3">做事</text>
+      <text x="60" y="108" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#999">完成一个任务</text>
+
+      <!-- Arrow -->
+      <line x1="115" y1="80" x2="150" y2="80" stroke="#ddd" stroke-width="1.5"/>
+      <polygon points="148,75 158,80 148,85" fill="#ddd"/>
+
+      <!-- Step 2 -->
+      <rect x="160" y="40" width="100" height="80" rx="10" fill="#00b894" fill-opacity="0.06" stroke="#00b894" stroke-width="1.2"/>
+      <text x="210" y="68" text-anchor="middle" font-size="22">🤔</text>
+      <text x="210" y="90" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="12" font-weight="600" fill="#00b894">回顾</text>
+      <text x="210" y="108" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#999">有可复用的吗？</text>
+
+      <!-- Arrow -->
+      <line x1="265" y1="80" x2="300" y2="80" stroke="#ddd" stroke-width="1.5"/>
+      <polygon points="298,75 308,80 298,85" fill="#ddd"/>
+
+      <!-- Step 3 -->
+      <rect x="310" y="40" width="100" height="80" rx="10" fill="#6C5CE7" fill-opacity="0.06" stroke="#6C5CE7" stroke-width="1.2"/>
+      <text x="360" y="68" text-anchor="middle" font-size="22">💾</text>
+      <text x="360" y="90" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="12" font-weight="600" fill="#6C5CE7">沉淀</text>
+      <text x="360" y="108" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#999">保存为模板</text>
+
+      <!-- Arrow -->
+      <line x1="360" y1="125" x2="360" y2="158" stroke="#ddd" stroke-width="1.5"/>
+      <polygon points="355,156 360,166 365,156" fill="#ddd"/>
+
+      <!-- Step 4 -->
+      <rect x="310" y="168" width="100" height="60" rx="10" fill="#e84393" fill-opacity="0.06" stroke="#e84393" stroke-width="1.2"/>
+      <text x="360" y="196" text-anchor="middle" font-size="22">🔄</text>
+      <text x="360" y="218" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="12" font-weight="600" fill="#e84393">复用 + 迭代</text>
+
+      <!-- Arrow back -->
+      <path d="M 310 198 Q 60 220 60 125" fill="none" stroke="#ddd" stroke-width="1.2" stroke-dasharray="5,4"/>
+      <polygon points="56,128 60,118 64,128" fill="#ddd"/>
+      <text x="140" y="200" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="10" fill="#999">越用越好</text>
+    </svg>
+  </div>
+  <div class="diagram-caption">沉淀的正循环：做 → 回顾 → 沉淀 → 复用 → 迭代 → 做得更好</div>
+
+  <div class="card">
+    <h3>沉淀什么到哪里？</h3>
+    <table class="compare-table">
+      <tr><th>你发现了什么</th><th>沉淀为</th><th>下次怎么用</th></tr>
+      <tr><td>解决某类问题的步骤</td><td><strong>Command</strong></td><td><code>/command名</code> 一键触发</td></tr>
+      <tr><td>某个领域的工作方法论</td><td><strong>Skill</strong></td><td>Claude 自动具备该领域能力</td></tr>
+      <tr><td>跟 Claude 协作的规则</td><td><strong>CLAUDE.md</strong></td><td>每次会话自动加载</td></tr>
+      <tr><td>重要的背景信息</td><td><strong>Memory</strong></td><td>Claude 跨会话记住</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>怎么沉淀？（具体步骤）</h3>
+    <p>你不需要自己写代码或配置文件——<strong>告诉 Claude 就行</strong>。</p>
+
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-content">
+        <h4>做完事后问自己</h4>
+        <p>"这个过程有没有可复用的部分？下次还会做类似的事吗？"</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-content">
+        <h4>如果有，告诉 Claude</h4>
+        <p>直接说："把刚才的流程沉淀为一个 Command，名字叫 xxx"。Claude 会帮你创建文件、写好模板。</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-content">
+        <h4>下次直接调用</h4>
+        <p>在 Claude Code 里输入 <code>/你的command名</code>，一键触发。不用再从头解释。</p>
+      </div>
+    </div>
+
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-content">
+        <h4>用完了迭代改进</h4>
+        <p>每次用完看看哪里可以更好，告诉 Claude "把这个改进加到 command 里"。越用越顺。</p>
+      </div>
+    </div>
+
+    <div class="code-block" style="margin-top: 1rem;">
+<span class="comment"># 实际对话示例</span>
+<span class="prompt">You:</span> <span class="highlight">把刚才帮我写周报的流程，沉淀为一个 command，叫 weekly-report</span>
+
+<span class="prompt">Claude:</span> 好的，我来创建 /weekly-report command。它会：
+1. 读取本周的工作记录
+2. 按 "本周完成 / 下周计划 / 遇到的问题" 结构整理
+3. 用你喜欢的简洁风格输出
+
+<span class="comment">[Claude 创建了 .claude/commands/weekly-report.md]</span>
+
+以后直接输入 /weekly-report 就能生成周报了。
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>为什么这是最重要的技能？</h3>
+
+    <div class="diagram">
+      <svg width="480" height="160" viewBox="0 0 480 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Without -->
+        <rect x="10" y="10" width="220" height="140" rx="12" fill="#e17055" fill-opacity="0.04" stroke="#e17055" stroke-width="1"/>
+        <text x="120" y="38" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="12" font-weight="700" fill="#e17055">没有沉淀</text>
+        <text x="120" y="62" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" fill="#666">每次都从头来</text>
+        <text x="120" y="80" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" fill="#666">AI 是一次性工具</text>
+        <text x="120" y="98" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" fill="#666">能力不积累</text>
+        <!-- Flat line -->
+        <line x1="30" y1="130" x2="210" y2="130" stroke="#e17055" stroke-width="2"/>
+        <text x="210" y="142" font-family="-apple-system,sans-serif" font-size="9" fill="#e17055">时间 →</text>
+
+        <!-- With -->
+        <rect x="250" y="10" width="220" height="140" rx="12" fill="#00b894" fill-opacity="0.04" stroke="#00b894" stroke-width="1"/>
+        <text x="360" y="38" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="12" font-weight="700" fill="#00b894">有沉淀</text>
+        <text x="360" y="62" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" fill="#666">方法论不断积累</text>
+        <text x="360" y="80" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" fill="#666">AI 越来越强大</text>
+        <text x="360" y="98" text-anchor="middle" font-family="-apple-system,sans-serif" font-size="11" fill="#666">复利效应</text>
+        <!-- Exponential curve -->
+        <path d="M 270 130 Q 340 128 400 105 Q 440 88 450 72" fill="none" stroke="#00b894" stroke-width="2"/>
+        <text x="450" y="66" font-family="-apple-system,sans-serif" font-size="9" fill="#00b894">🚀</text>
+      </svg>
+    </div>
+
+    <p>有沉淀 vs 没有沉淀的差距，随着时间推移会越来越大。这就是<strong>复利效应</strong>——每次沉淀都在为未来的自己积累"资产"。这也是为什么同样用 AI 半年，有些人觉得"也就那样"，有些人觉得"离不开了"。</p>
+  </div>
+
+  <div class="evolution">
+    <span class="evolution-step">用 AI 做事</span>
+    <span class="evolution-arrow">→</span>
+    <span class="evolution-step">教 AI 做事</span>
+    <span class="evolution-arrow">→</span>
+    <span class="evolution-step">和 AI 一起构建系统</span>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     Part 6 实战场景
+     ═══════════════════════════════════════ -->
+<section class="part" id="part6">
+  <div class="part-label">Part 6</div>
+  <h2>日常场景实战</h2>
+  <p class="part-desc">用真实场景串联前面所有知识。每个场景都标注了对应的协作层级，帮你建立"不同层级的人会怎么做同一件事"的直觉。</p>
+
+  <div class="card">
+    <h3>📝 场景一：让 Claude 帮你写文档</h3>
+    <table class="compare-table">
+      <tr><th>层级</th><th>你会怎么做</th></tr>
+      <tr><td style="color: var(--green); font-weight:600;">L0</td><td>"帮我写一封感谢信" → 拿到结果</td></tr>
+      <tr><td style="color: var(--blue); font-weight:600;">L1</td><td>"帮我写感谢信" → "语气随意一点" → "加上这个细节" → 满意</td></tr>
+      <tr><td style="color: var(--accent); font-weight:600;">L2</td><td>"我想感谢领导对项目的支持，但不想太正式也不想太随便，你觉得什么调性合适？" → 讨论调性 → 写</td></tr>
+      <tr><td style="color: var(--orange); font-weight:600;">L3</td><td>"看看我最近的邮件风格，帮我给领导写封感谢信，关于XX项目"</td></tr>
+      <tr><td style="color: var(--pink); font-weight:600;">L4+</td><td>设置 /thank-letter command，以后一句话生成符合你风格的感谢信</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <h3>📂 场景二：整理文件</h3>
+    <div class="code-block">
+<span class="prompt">You:</span> <span class="highlight">帮我看看下载文件夹里有多少文件，按类型分类，
+     超过 30 天没打开的标记出来</span>
+
+<span class="prompt">Claude:</span> 我来分析一下你的下载文件夹...
+
+<span class="comment">[Claude 读取文件列表、检查修改时间]</span>
+
+📊 下载文件夹分析：
+- 总计 47 个文件
+- PDF（12个）：工作文档为主
+- 图片（18个）：截图和下载的图
+- 安装包（5个）：⚠️ 占用 2.3GB
+- 其他（12个）
+
+🕐 超过 30 天未打开（23个）：
+- setup_v2.dmg（186MB，62天前）
+- ...
+
+建议：要不要帮你把安装包和超期文件移到废纸篓？
+    </div>
+    <div class="tip"><strong>进阶：</strong>如果你经常整理文件，可以沉淀为一个 <code>/clean-downloads</code> command，设为每周定时执行——这就是 Level 4（系统模式）。</div>
+  </div>
+
+  <div class="card">
+    <h3>🔍 场景三：搜索和研究</h3>
+    <p>Claude Code 可以帮你做比搜索引擎深入得多的研究：</p>
+    <div class="code-block">
+<span class="prompt">You:</span> <span class="highlight">我想了解"个人知识管理"领域的主流方法论，
+     帮我对比 PARA、Zettelkasten 和 CODE 三种方法，
+     列出各自适合什么人</span>
+
+<span class="prompt">Claude:</span> 我来搜索和整理这几种方法论的信息...
+
+<span class="comment">[Claude 调用搜索工具，阅读多个来源，交叉对比]</span>
+
+# 个人知识管理三大方法论对比
+
+## PARA（Tiago Forte）
+- 核心：按行动力分类（项目/领域/资源/归档）
+- 适合：行动导向的人，项目多的职场人
+- 优势：上手快，与任务管理天然融合
+...
+    </div>
+    <p>注意区别：搜索引擎给你<strong>链接列表</strong>，Claude 给你<strong>整理好的答案</strong>。你省掉的是打开 10 个网页、逐个阅读、自己总结的时间。</p>
+  </div>
+
+  <div class="card">
+    <h3>📱 场景四：手机远程使用</h3>
+    <p>Claude Code 运行在你的电脑上，但你可以通过手机远程操控：</p>
+    <ul>
+      <li><strong>Telegram Bot</strong>：给你的 Bot 发消息 → 转发给电脑上的 Claude Code → 结果发回手机</li>
+      <li><strong>SSH</strong>：手机安装终端 App（如 Termius），直接连到电脑</li>
+    </ul>
+    <p>这意味着你出门在外也能让 AI 帮你处理电脑上的事——"帮我看看邮箱有没有重要邮件"、"把那个文件发给同事"。</p>
+    <div class="analogy"><strong>类比：</strong>就像远程遥控你办公桌上的助理——你在外面打电话告诉它做什么，它在办公室帮你做好。</div>
+  </div>
+
+  <div class="card">
+    <h3>⏰ 场景五：定时任务（Level 4）</h3>
+    <p>让 AI 按计划自动运转，不需要你手动触发：</p>
+    <ul>
+      <li><strong>每天早上 8:00</strong>：汇总昨天的工作记录，生成今日待办</li>
+      <li><strong>每周五下午</strong>：整理本周完成的任务，生成周报草稿</li>
+      <li><strong>每天晚上</strong>：检查下载文件夹，清理超期文件</li>
+      <li><strong>有新邮件时</strong>：自动分类，重要的发 Telegram 通知你</li>
+    </ul>
+    <p>这就是 Level 4（系统模式）的典型场景——你在<strong>设计系统</strong>，而不是在做具体任务。系统设计好后，AI 就按规则持续运转。</p>
+  </div>
+
+  <div class="callout" style="margin-top: 2.5rem;">
+    <p>工具只是起点。<br>真正的力量在于你如何<span style="color: var(--accent);">思考</span>与 AI 的关系。</p>
+    <div class="attribution">从 Level 0 到 Level 5，从工具到共生——这条路没有捷径，但有地图。<br>你现在手里就有了这份地图。</div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <p><strong>Claude Code 小白教程 — 从零到共生</strong></p>
+  <p style="margin-top: 0.3rem;">by Alan · 2026</p>
+  <p style="margin-top: 0.8rem; font-size: 0.8rem;">每一层的跨越不是技术问题，是认知跃迁。</p>
+</footer>
+
+</body>
+</html>
