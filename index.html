@@ -146,41 +146,110 @@
     50% { transform: translateX(-50%) translateY(8px); }
   }
 
-  /* ─── TOC ─── */
-  .toc {
-    position: sticky;
+  /* ─── Sidebar TOC ─── */
+  .toc-sidebar {
+    position: fixed;
     top: 0;
-    z-index: 100;
-    background: rgba(250, 250, 248, 0.88);
+    left: 0;
+    width: 240px;
+    height: 100vh;
+    background: rgba(250, 250, 248, 0.92);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    border-bottom: 1px solid var(--border-light);
-    padding: 0.7rem 2rem;
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-  .toc::-webkit-scrollbar { display: none; }
-
-  .toc-inner {
-    max-width: 900px;
-    margin: 0 auto;
-    display: flex;
-    gap: 0.25rem;
+    border-right: 1px solid var(--border-light);
+    padding: 1.5rem 0;
+    overflow-y: auto;
+    z-index: 100;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+    transform: translateX(0);
+    transition: transform 0.3s ease;
   }
 
-  .toc a {
-    display: inline-block;
-    padding: 0.4rem 0.85rem;
-    border-radius: 100px;
-    font-size: 0.82rem;
-    font-weight: 500;
-    color: var(--text-2);
+  .toc-sidebar::-webkit-scrollbar { width: 4px; }
+  .toc-sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  .toc-sidebar .toc-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-3);
+    padding: 0 1.2rem;
+    margin-bottom: 0.8rem;
+  }
+
+  .toc-sidebar .toc-part {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--text);
+    padding: 0.45rem 1.2rem;
+    display: block;
     text-decoration: none;
-    transition: all 0.2s;
-    white-space: nowrap;
+    transition: all 0.15s;
+    border-left: 2px solid transparent;
   }
 
-  .toc a:hover { background: var(--accent-dim); color: var(--accent); }
+  .toc-sidebar .toc-part:hover {
+    color: var(--accent);
+    background: var(--accent-dim2);
+  }
+
+  .toc-sidebar .toc-part.active {
+    color: var(--accent);
+    border-left-color: var(--accent);
+    background: var(--accent-dim);
+  }
+
+  .toc-sidebar .toc-sub {
+    font-size: 0.74rem;
+    font-weight: 400;
+    color: var(--text-3);
+    padding: 0.25rem 1.2rem 0.25rem 2rem;
+    display: block;
+    text-decoration: none;
+    transition: all 0.15s;
+    border-left: 2px solid transparent;
+    line-height: 1.5;
+  }
+
+  .toc-sidebar .toc-sub:hover {
+    color: var(--accent);
+    background: var(--accent-dim2);
+  }
+
+  .toc-sidebar .toc-sub.active {
+    color: var(--accent);
+    border-left-color: var(--accent-light);
+  }
+
+  .toc-sidebar .toc-divider {
+    height: 1px;
+    background: var(--border-light);
+    margin: 0.5rem 1.2rem;
+  }
+
+  /* Offset main content for sidebar */
+  .has-sidebar { padding-left: 240px; }
+
+  .toc-toggle {
+    display: none;
+    position: fixed;
+    top: 0.8rem;
+    left: 0.8rem;
+    z-index: 200;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: rgba(255,255,255,0.9);
+    backdrop-filter: blur(12px);
+    cursor: pointer;
+    font-size: 1.1rem;
+    line-height: 36px;
+    text-align: center;
+    box-shadow: var(--shadow-sm);
+  }
 
   /* ─── Main ─── */
   main {
@@ -234,6 +303,8 @@
     box-shadow: var(--shadow-sm);
     transition: box-shadow 0.2s, border-color 0.2s;
   }
+
+  .card[id], .config-card[id], .level-card[id] { scroll-margin-top: 2rem; }
 
   .card:hover {
     box-shadow: var(--shadow-md);
@@ -349,6 +420,7 @@
     overflow-x: auto;
     margin: 0.8rem 0;
     line-height: 1.7;
+    white-space: pre-wrap;
     box-shadow: var(--shadow-md);
   }
 
@@ -634,12 +706,19 @@
 
   html { scroll-behavior: smooth; }
 
+  /* ─── Tablet: collapse sidebar ─── */
+  @media (max-width: 960px) {
+    .toc-sidebar { transform: translateX(-100%); }
+    .toc-sidebar.open { transform: translateX(0); box-shadow: 4px 0 24px rgba(0,0,0,0.08); }
+    .has-sidebar { padding-left: 0; }
+    .toc-toggle { display: block; }
+  }
+
   /* ─── Mobile ─── */
   @media (max-width: 600px) {
     .hero { min-height: 88vh; padding: 1.5rem; }
     main { padding: 0 1rem 4rem; }
     .part { margin-top: 3.5rem; }
-    .toc { padding: 0.6rem 1rem; }
     .card { padding: 1.3rem 1.4rem; }
     .level-card { padding: 1.4rem; }
     .hero-features { gap: 1rem; }
@@ -654,6 +733,7 @@
     <div class="hero-tag">为非技术人写的 AI 协作指南</div>
     <h1>Claude Code<br><span>从零到共生</span></h1>
     <p>不只教你用工具，更教你理解——人与 AI 协作的认知地图。从"不知道命令行是什么"到"构建你的 AI 操作系统"。</p>
+    <p style="font-size: 0.85rem; color: var(--text-3); margin-top: -1.5rem; margin-bottom: 2rem;">v1.0 · 最近更新 2026-04-16</p>
     <div class="hero-features">
       <div class="hero-feature"><div class="dot"></div>7 个章节</div>
       <div class="hero-feature"><div class="dot"></div>6 层协作认知</div>
@@ -663,19 +743,65 @@
   <div class="scroll-hint">↓ 向下滚动开始</div>
 </section>
 
-<!-- ═══════ TOC ═══════ -->
-<nav class="toc">
-  <div class="toc-inner">
-    <a href="#part0">Part 0 心智模型</a>
-    <a href="#part1">Part 1 准备工作</a>
-    <a href="#part2">Part 2 基础操作</a>
-    <a href="#part3">Part 3 协作层级</a>
-    <a href="#part4">Part 4 配置体系</a>
-    <a href="#part5">Part 5 沉淀工作流</a>
-    <a href="#part6">Part 6 实战场景</a>
-  </div>
+<!-- ═══════ Sidebar TOC ═══════ -->
+<button class="toc-toggle" onclick="document.querySelector('.toc-sidebar').classList.toggle('open')" aria-label="目录">☰</button>
+<nav class="toc-sidebar" id="tocSidebar">
+  <div class="toc-title">目录</div>
+
+  <a class="toc-part" href="#part0">Part 0 · 心智模型</a>
+  <a class="toc-sub" href="#p0-files">文件与文件夹</a>
+  <a class="toc-sub" href="#p0-cli">桌面系统 vs 命令行</a>
+  <a class="toc-sub" href="#p0-local">本地 vs 云端</a>
+  <a class="toc-sub" href="#p0-path">路径——文件的门牌号</a>
+  <a class="toc-sub" href="#p0-install">"安装"在做什么</a>
+  <div class="toc-divider"></div>
+
+  <a class="toc-part" href="#part1">Part 1 · 准备工作</a>
+  <a class="toc-sub" href="#p1-terminal">打开终端</a>
+  <a class="toc-sub" href="#p1-commands">三个基础命令</a>
+  <a class="toc-sub" href="#p1-tools">安装必备工具</a>
+  <a class="toc-sub" href="#p1-launch">第一次启动</a>
+  <div class="toc-divider"></div>
+
+  <a class="toc-part" href="#part2">Part 2 · 基础操作</a>
+  <a class="toc-sub" href="#p2-first">第一件事</a>
+  <a class="toc-sub" href="#p2-understand">理解 Claude 在做什么</a>
+  <a class="toc-sub" href="#p2-permission">权限确认</a>
+  <a class="toc-sub" href="#p2-workspace">工作空间</a>
+  <div class="toc-divider"></div>
+
+  <a class="toc-part" href="#part3">Part 3 · 协作层级</a>
+  <a class="toc-sub" href="#p3-l0">L0 一次性问答</a>
+  <a class="toc-sub" href="#p3-l1">L1 多轮打磨</a>
+  <a class="toc-sub" href="#p3-l2">L2 先讨论后执行</a>
+  <a class="toc-sub" href="#p3-l3">L3 目标驱动</a>
+  <a class="toc-sub" href="#p3-l4">L4 架构师思维</a>
+  <a class="toc-sub" href="#p3-l5">L5 AI 操作系统</a>
+  <div class="toc-divider"></div>
+
+  <a class="toc-part" href="#part4">Part 4 · 配置体系</a>
+  <a class="toc-sub" href="#p4-claudemd">CLAUDE.md</a>
+  <a class="toc-sub" href="#p4-memory">Memory</a>
+  <a class="toc-sub" href="#p4-command">Command</a>
+  <a class="toc-sub" href="#p4-skill">Skill</a>
+  <a class="toc-sub" href="#p4-relation">四者的关系</a>
+  <div class="toc-divider"></div>
+
+  <a class="toc-part" href="#part5">Part 5 · 沉淀工作流</a>
+  <a class="toc-sub" href="#p5-what">沉淀什么到哪里</a>
+  <a class="toc-sub" href="#p5-how">怎么沉淀</a>
+  <a class="toc-sub" href="#p5-why">为什么最重要</a>
+  <div class="toc-divider"></div>
+
+  <a class="toc-part" href="#part6">Part 6 · 实战场景</a>
+  <a class="toc-sub" href="#p6-context">自动加载上下文</a>
+  <a class="toc-sub" href="#p6-edit">多轮编辑文件</a>
+  <a class="toc-sub" href="#p6-design">多轮做方案</a>
+  <a class="toc-sub" href="#p6-research">搜索与研究</a>
+  <a class="toc-sub" href="#p6-system">系统化场景</a>
 </nav>
 
+<div class="has-sidebar">
 <main>
 
 <!-- ═══════════════════════════════════════
@@ -687,7 +813,7 @@
   <p class="part-desc">在碰任何 AI 工具之前，先在脑子里建立正确的"数字世界地图"。大部分小白卡住不是因为不会操作，是因为脑子里没有正确的画面。这一章帮你把画面补上。</p>
 
   <!-- 文件与文件夹 -->
-  <div class="card">
+  <div class="card" id="p0-files">
     <h3>📁 文件与文件夹</h3>
     <p>你在电脑上做的一切——写文档、存照片、装软件——最终都变成了<strong>文件</strong>，放在某个<strong>文件夹</strong>里。文件夹可以嵌套，形成一棵"树"。</p>
     <div class="analogy"><strong>类比：</strong>文件 = 一张纸，文件夹 = 抽屉。你的电脑就是一个巨大的文件柜，每个抽屉里还可以有小抽屉。</div>
@@ -752,7 +878,7 @@
   </div>
 
   <!-- 桌面 vs 命令行 -->
-  <div class="card">
+  <div class="card" id="p0-cli">
     <h3>🖥 桌面系统 vs 命令行</h3>
     <p>你平时用电脑的方式——点图标、拖文件、双击打开——这叫<strong>图形界面（GUI）</strong>。还有另一种方式，用<strong>文字</strong>跟电脑对话，叫<strong>命令行（CLI）</strong>。</p>
 
@@ -809,7 +935,7 @@
   </div>
 
   <!-- 本地 vs 云端 -->
-  <div class="card">
+  <div class="card" id="p0-local">
     <h3>🏠 本地 vs 云端</h3>
 
     <div class="diagram">
@@ -851,7 +977,7 @@
   </div>
 
   <!-- 路径 -->
-  <div class="card">
+  <div class="card" id="p0-path">
     <h3>📍 路径——文件的"门牌号"</h3>
     <p>每个文件在电脑里都有一个唯一的"地址"，叫做<strong>路径（path）</strong>。</p>
 
@@ -887,7 +1013,7 @@
   </div>
 
   <!-- 安装 -->
-  <div class="card">
+  <div class="card" id="p0-install">
     <h3>📦 "安装"到底在做什么</h3>
     <p>很多人对"安装"有神秘感。其实安装一个程序，本质上就是三件事：</p>
     <ul>
@@ -913,7 +1039,7 @@
   <h2>准备工作</h2>
   <p class="part-desc">最小步骤把环境跑起来。跟着做一遍，10 分钟搞定。遇到问题不要慌——每一步我都会告诉你可能碰到什么、怎么处理。</p>
 
-  <div class="card">
+  <div class="card" id="p1-terminal">
     <h3>Step 1：打开终端</h3>
     <p>终端就是那个"可以打字跟电脑对话"的窗口。Mac 上有好几种打开方式：</p>
 
@@ -984,7 +1110,7 @@
     <div class="tip"><strong>小贴士：</strong>终端窗口的颜色、字体可能跟图不一样，这完全正常。重要的是你看到了那个闪烁的光标——它代表"我准备好了，等你输入"。</div>
   </div>
 
-  <div class="card">
+  <div class="card" id="p1-commands">
     <h3>Step 2：认识三个最基础的命令</h3>
     <p>在命令行里，你只需要记住三个命令就能"走路"。就像现实生活中你只需要知道"我在哪"、"周围有什么"、"去那里"：</p>
 
@@ -1024,7 +1150,7 @@
     <div class="warning"><strong>别担心：</strong>一旦你开始用 Claude Code，这些命令你几乎不需要手动输入。因为 Claude 会帮你做这些事。但理解它们在做什么，能让你更好地跟 Claude 配合。</div>
   </div>
 
-  <div class="card">
+  <div class="card" id="p1-tools">
     <h3>Step 3：安装必备工具</h3>
     <p>Claude Code 需要一个叫 <strong>Node.js</strong> 的运行环境。你可以理解为：Node.js 是"基础设施"，Claude Code 是"建在上面的应用"。</p>
 
@@ -1064,7 +1190,7 @@
     <div class="tip"><strong>npm 是什么？</strong>它是 Node.js 自带的"应用商店"。<code>npm install -g</code> 就是在说"从应用商店下载并全局安装"。<code>-g</code> 表示全局（global），意味着在任何文件夹都能用。</div>
   </div>
 
-  <div class="card">
+  <div class="card" id="p1-launch">
     <h3>Step 4：第一次启动 Claude Code</h3>
 
     <div class="code-block">
@@ -1118,7 +1244,7 @@
   <h2>开始使用 Claude Code</h2>
   <p class="part-desc">环境搭好了。现在学会跟 Claude Code 协作，理解它在做什么——这比背命令重要得多。</p>
 
-  <div class="card">
+  <div class="card" id="p2-first">
     <h3>💬 让 Claude 帮你做第一件事</h3>
     <p>不需要学特殊语法，直接用中文说你想做什么。比如：</p>
 
@@ -1138,7 +1264,7 @@
     <p>注意：Claude 不只是在"猜"——它真的去<strong>执行了命令</strong>，读取了你的文件系统。</p>
   </div>
 
-  <div class="card">
+  <div class="card" id="p2-understand">
     <h3>🔍 理解 Claude 在做什么</h3>
     <p>Claude Code 和普通 AI 聊天的最大区别：<strong>它能真正操作你的电脑</strong>。它做的每一步都会告诉你。</p>
 
@@ -1206,7 +1332,7 @@
     </ul>
   </div>
 
-  <div class="card">
+  <div class="card" id="p2-permission">
     <h3>🔐 权限确认——Claude 在问你"可以吗"</h3>
     <p>当 Claude 要做可能有影响的操作（修改文件、执行命令），它会先问你：</p>
 
@@ -1230,7 +1356,7 @@
     <div class="tip"><strong>随着信任积累：</strong>你可以在设置里把某些操作设为"自动允许"，这样 Claude 就不用每次都问你了。但刚开始建议保持手动确认，先熟悉它的行为模式。</div>
   </div>
 
-  <div class="card">
+  <div class="card" id="p2-workspace">
     <h3>📂 文件夹 = 你的工作空间</h3>
     <p>这是一个很重要的概念：<strong>你在哪个文件夹启动 Claude，它就主要看那个文件夹里的东西</strong>。</p>
 
@@ -1310,7 +1436,7 @@
 
   <div class="levels">
 
-    <div class="level-card">
+    <div class="level-card" id="p3-l0">
       <div class="level-badge">Level 0 · 工具模式</div>
       <h3>一次性问答</h3>
       <div class="example">"帮我写一封邮件" → 拿到结果 → 结束</div>
@@ -1324,7 +1450,7 @@
       <div class="key-insight"><strong>瓶颈：</strong>你必须一次把需求说清楚，但现实中很少有人能做到。结果往往不满意，然后归结为"AI 不够聪明"。</div>
     </div>
 
-    <div class="level-card">
+    <div class="level-card" id="p3-l1">
       <div class="level-badge">Level 1 · 对话模式</div>
       <h3>多轮打磨</h3>
       <div class="example">"帮我写一封邮件" → "语气再正式一点" → "加上这个背景" → 满意</div>
@@ -1338,7 +1464,7 @@
       <div class="key-insight"><strong>关键认知：</strong>你不需要一次说清楚。可以先给一个大方向，然后通过反馈不断调整。好的结果是"对话"出来的，不是"问"出来的。</div>
     </div>
 
-    <div class="level-card">
+    <div class="level-card" id="p3-l2">
       <div class="level-badge">Level 2 · 协作模式</div>
       <h3>先讨论后执行</h3>
       <div class="example">"我想做X，但还没想清楚" → 一起讨论 → 对齐方案 → 制定计划 → 逐步执行</div>
@@ -1352,7 +1478,7 @@
       <div class="key-insight"><strong>关键认知：</strong>把"想"和"做"分开。AI 两个都能帮——但让它帮你想，往往比让它帮你做更有价值。</div>
     </div>
 
-    <div class="level-card">
+    <div class="level-card" id="p3-l3">
       <div class="level-badge">Level 3 · 委托模式</div>
       <h3>目标驱动</h3>
       <div class="example">"我的目标是X" → AI 自己拆解计划 → 自己执行 → 自己验证 → 汇报结果</div>
@@ -1366,7 +1492,7 @@
       <div class="key-insight"><strong>关键认知：</strong>信任但验证。让 AI 自由发挥，但保持对结果的审核。学会做"甲方"——不是什么都自己干，而是能判断"做得好不好"。</div>
     </div>
 
-    <div class="level-card">
+    <div class="level-card" id="p3-l4">
       <div class="level-badge">Level 4 · 系统模式</div>
       <h3>架构师思维</h3>
       <div class="example">设计定时任务、触发规则、多 Agent 协作、自动化工作流——AI 按规则持续运转</div>
@@ -1380,7 +1506,7 @@
       <div class="key-insight"><strong>关键认知：</strong>从"用 AI 做事"到"让 AI 替你运转"。你的价值不是做事，是设计让 AI 做事的系统。</div>
     </div>
 
-    <div class="level-card">
+    <div class="level-card" id="p3-l5">
       <div class="level-badge">Level 5 · 共生模式</div>
       <h3>你 + AI 操作系统</h3>
       <div class="example">AI 深度嵌入你的知识管理、任务管理、决策支持系统，成为你的"外脑"</div>
@@ -1451,7 +1577,7 @@
   <div class="diagram-caption">四个配置层共同构建了 Claude 对你的"理解"</div>
 
   <div class="config-grid">
-    <div class="config-card">
+    <div class="config-card" id="p4-claudemd">
       <div class="config-icon">📋</div>
       <h3>CLAUDE.md</h3>
       <div class="subtitle">给 AI 的"员工手册"</div>
@@ -1465,7 +1591,7 @@
       <p style="margin-top: 0.5rem;">越写越详细 → Claude 行为越符合期望。就像一份越来越完善的员工手册——新来的同事按手册做事就能达到 80 分。</p>
     </div>
 
-    <div class="config-card">
+    <div class="config-card" id="p4-memory">
       <div class="config-icon">🧠</div>
       <h3>Memory</h3>
       <div class="subtitle">AI 的"工作笔记本"</div>
@@ -1473,7 +1599,7 @@
       <p style="margin-top: 0.5rem;">你也可以主动告诉 Claude"记住这个"。就像你的助理随身带着一个小本子，记着你喜欢什么、不喜欢什么、上次讨论到哪了。协作时间越长，它越"懂你"。</p>
     </div>
 
-    <div class="config-card">
+    <div class="config-card" id="p4-command">
       <div class="config-icon">⚡</div>
       <h3>Command</h3>
       <div class="subtitle">可复用的指令模板</div>
@@ -1481,7 +1607,7 @@
       <p style="margin-top: 0.5rem;">类比：跟助理说"按上次的格式再写一份"——它已经知道格式、步骤、注意事项。你不用每次重新解释。</p>
     </div>
 
-    <div class="config-card">
+    <div class="config-card" id="p4-skill">
       <div class="config-icon">🎓</div>
       <h3>Skill</h3>
       <div class="subtitle">能力包</div>
@@ -1490,7 +1616,7 @@
     </div>
   </div>
 
-  <div class="card" style="margin-top: 1.2rem;">
+  <div class="card" id="p4-relation" style="margin-top: 1.2rem;">
     <h3>四者的关系</h3>
     <table class="compare-table">
       <tr><th>配置</th><th>作用</th><th>什么时候用</th><th>类比</th></tr>
@@ -1563,7 +1689,7 @@
   </div>
   <div class="diagram-caption">沉淀的正循环：做 → 回顾 → 沉淀 → 复用 → 迭代 → 做得更好</div>
 
-  <div class="card">
+  <div class="card" id="p5-what">
     <h3>沉淀什么到哪里？</h3>
     <table class="compare-table">
       <tr><th>你发现了什么</th><th>沉淀为</th><th>下次怎么用</th></tr>
@@ -1574,7 +1700,7 @@
     </table>
   </div>
 
-  <div class="card">
+  <div class="card" id="p5-how">
     <h3>怎么沉淀？（具体步骤）</h3>
     <p>你不需要自己写代码或配置文件——<strong>告诉 Claude 就行</strong>。</p>
 
@@ -1625,7 +1751,7 @@
     </div>
   </div>
 
-  <div class="card">
+  <div class="card" id="p5-why">
     <h3>为什么这是最重要的技能？</h3>
 
     <div class="diagram">
@@ -1670,90 +1796,245 @@
 <section class="part" id="part6">
   <div class="part-label">Part 6</div>
   <h2>日常场景实战</h2>
-  <p class="part-desc">用真实场景串联前面所有知识。每个场景都标注了对应的协作层级，帮你建立"不同层级的人会怎么做同一件事"的直觉。</p>
+  <p class="part-desc">用真实场景串联前面所有知识。重点展示 Claude Code 最独特的能力——自动读取文件作为上下文、多轮迭代编辑、以及作为思考伙伴帮你做方案。</p>
 
-  <div class="card">
-    <h3>📝 场景一：让 Claude 帮你写文档</h3>
+  <!-- 场景一：自动加载上下文 -->
+  <div class="card" id="p6-context">
+    <h3>📂 场景一：自动加载文件做上下文</h3>
+    <p>Claude Code 最强的能力之一：<strong>它能直接读你电脑上的文件</strong>。你不用复制粘贴内容给它——直接说"看一下那个文件"，它就能读。</p>
+
+    <div class="code-block">
+<span class="prompt">You:</span> <span class="highlight">看一下 ~/Documents/产品需求/用户反馈汇总.xlsx，
+     帮我按问题类型分类，找出提到最多的前 5 个痛点</span>
+
+<span class="comment">[Claude 自动读取文件 → 分析内容 → 生成结构化总结]</span>
+
+<span class="prompt">Claude:</span> 我读了这个文件，共 238 条反馈。按类型分类后：
+
+<span class="output">📊 Top 5 用户痛点：
+1. 搜索结果不准确（47次，19.7%）— 用户期望精确匹配但得到模糊结果
+2. 导出功能缺失（31次，13.0%）— 无法批量导出为 Excel
+3. 页面加载慢（28次，11.8%）— 集中在列表页超过100条时
+4. 筛选条件不够灵活（25次，10.5%）— 缺少时间范围和组合筛选
+5. 移动端体验差（22次，9.2%）— 表格在手机上无法横向滚动</span>
+
+要不要我进一步分析每个痛点的具体用户原话？
+    </div>
+
+    <p style="margin-top: 1rem;">再看一个更强的场景——<strong>跨文件加载上下文</strong>：</p>
+
+    <div class="code-block">
+<span class="prompt">You:</span> <span class="highlight">我要给客户做一份项目汇报。
+     先看一下这三个文件了解背景：
+     - 项目计划书.docx
+     - 上周的会议纪要.md
+     - 本月的进度跟踪表.xlsx
+     然后帮我写一份汇报大纲</span>
+
+<span class="comment">[Claude 读取 3 个文件 → 理解项目全貌 → 生成汇报]</span>
+
+<span class="prompt">Claude:</span> 我读完了三个文件，整理一下关键信息：
+- 项目目标：Q2 上线智能推荐模块
+- 上周会议确定：推荐算法从协同过滤改为向量检索
+- 进度：整体 68%，算法模块滞后 1 周
+
+<span class="output">建议汇报大纲：
+1. 项目概况与里程碑回顾
+2. 本月关键进展（3 项）
+3. 技术方案调整说明（协同过滤 → 向量检索，为什么）
+4. 风险项：算法模块滞后的应对方案
+5. 下一步计划与资源需求</span>
+    </div>
+
+    <div class="tip"><strong>核心区别：</strong>普通 AI 聊天（ChatGPT / Claude.ai 网页版）需要你复制粘贴内容进去。Claude Code 直接读文件——它拿到的是<strong>完整上下文</strong>，不是你截取的片段。这意味着它的理解更准确，你也更省事。</div>
+  </div>
+
+  <!-- 场景二：多轮编辑文件 -->
+  <div class="card" id="p6-edit">
+    <h3>✏️ 场景二：多轮编辑文件</h3>
+    <p>Claude Code 不只能"生成内容"，它可以<strong>直接修改你电脑上的文件</strong>。而且可以多轮调整，就像跟一个助手反复改稿一样。</p>
+
+    <div class="code-block">
+<span class="comment">── 第 1 轮：给出初始需求 ──</span>
+
+<span class="prompt">You:</span> <span class="highlight">帮我写一份周报，保存到 ~/Documents/周报/2026-W16.md
+     这周主要做了：用户访谈 5 场、产品原型第二版、跟技术对齐了推荐方案</span>
+
+<span class="prompt">Claude:</span> 已创建文件 ~/Documents/周报/2026-W16.md ✅
+
+<span class="comment">── 第 2 轮：调整格式 ──</span>
+
+<span class="prompt">You:</span> <span class="highlight">格式不对，参考上周的 2026-W15.md 的格式来写</span>
+
+<span class="comment">[Claude 读取上周文件 → 理解格式 → 重写本周文件]</span>
+
+<span class="prompt">Claude:</span> 已按上周格式更新 ✅ 主要调整：加了"本周亮点"和"下周计划"两个固定板块
+
+<span class="comment">── 第 3 轮：补充细节 ──</span>
+
+<span class="prompt">You:</span> <span class="highlight">在"用户访谈"部分补充一下——5 场访谈中有 3 场提到了
+     导出功能缺失的问题，这个发现很重要，单独高亮</span>
+
+<span class="prompt">Claude:</span> 已更新，在访谈部分增加了关键发现高亮 ✅
+    </div>
+
+    <p style="margin-top: 1rem;">另一个常见场景——<strong>修改已有的长文档</strong>：</p>
+
+    <div class="code-block">
+<span class="prompt">You:</span> <span class="highlight">打开 产品需求文档v2.md，把第三章"用户权限"部分重写一下。
+     现在的写法太技术化了，改成产品经理能看懂的版本，
+     保留所有功能点，只改表述方式</span>
+
+<span class="comment">[Claude 读取文件 → 定位第三章 → 只改该章节，其他不动]</span>
+
+<span class="prompt">Claude:</span> 已更新第三章。改动要点：
+<span class="output">- "RBAC 权限模型" → "谁能看什么、谁能改什么"
+- "JWT Token 过期策略" → "登录状态保持时长"
+- 新增了一个角色权限对照表，更直观</span>
+其他章节未修改。
+    </div>
+
+    <div class="analogy"><strong>关键能力：</strong>Claude Code 编辑文件是"精确修改"——不是整个文件重写，而是只改你要求的部分，其他内容保持不动。就像让编辑改稿——改第三段，不会动第一段。</div>
+  </div>
+
+  <!-- 场景三：多轮做方案 -->
+  <div class="card" id="p6-design">
+    <h3>🧠 场景三：多轮做方案 / 设计</h3>
+    <p>这是 Level 2（协作模式）的典型场景。你不需要一开始就想清楚——<strong>先跟 Claude 讨论，逐步收敛到方案</strong>。</p>
+
+    <div class="code-block">
+<span class="comment">── 第 1 轮：抛出模糊想法 ──</span>
+
+<span class="prompt">You:</span> <span class="highlight">我想给团队做一个内部知识库。现在大家的经验都在各自脑子里，
+     新人入职要问一圈才知道流程。但我还没想清楚具体怎么做。</span>
+
+<span class="prompt">Claude:</span> 好问题。在开始之前，我想先了解几个关键信息：
+<span class="output">1. 团队多大？（5人 vs 50人方案完全不同）
+2. 现在知识散落在哪些地方？（飞书文档/Notion/微信群/口口相传）
+3. 最痛的场景是什么？（新人入职？还是日常查找？）
+4. 你希望维护成本高还是低？（有人专门维护 vs 自然积累）</span>
+
+<span class="comment">── 第 2 轮：提供背景 ──</span>
+
+<span class="prompt">You:</span> <span class="highlight">12 人的产品技术团队。知识在飞书文档里但很散，
+     没有结构。最痛的是新人——上个月来了 2 个人，
+     我花了整整 3 天给他们讲各种流程。维护成本要低。</span>
+
+<span class="prompt">Claude:</span> 明白了。根据你的情况，我建议的方案：
+<span class="output">方案：飞书文档 + 结构化索引（而不是另起一个工具）
+
+理由：
+- 团队已经在用飞书，不增加工具切换成本
+- 12 人规模不需要专业知识库工具（过重）
+- 核心问题不是"没有文档"，是"文档没有结构"
+
+具体做法：
+1. 建一个"团队知识库"根文档，作为入口
+2. 按 4 个分类组织：流程类 / 规范类 / 工具类 / FAQ
+3. 每个分类下用飞书的"目录"功能链接到已有文档
+4. 新人入职 checklist 单独一页，链接到相关流程文档</span>
+
+要不要我帮你出一个具体的目录结构？
+
+<span class="comment">── 第 3 轮：细化执行方案 ──</span>
+
+<span class="prompt">You:</span> <span class="highlight">好，出一下目录结构。另外"流程类"里最重要的是
+     发版流程和 bug 处理流程，这两个能帮我先写出来吗？</span>
+
+<span class="prompt">Claude:</span> 我先出目录结构，然后写两个流程文档。
+
+<span class="comment">[Claude 创建 知识库目录.md → 创建 发版流程.md → 创建 Bug处理流程.md]</span>
+
+已创建 3 个文件 ✅ 你看看内容是否准确，我可以继续调整。
+    </div>
+
+    <p style="margin-top: 1rem;">再看一个<strong>产品设计</strong>的多轮协作：</p>
+
+    <div class="code-block">
+<span class="comment">── 第 1 轮：从问题出发 ──</span>
+
+<span class="prompt">You:</span> <span class="highlight">我们的搜索功能用户满意度很低。先看一下
+     ~/Documents/产品/搜索功能-用户反馈.md 和
+     ~/Documents/产品/搜索功能-埋点数据.csv，
+     帮我分析问题出在哪</span>
+
+<span class="comment">[Claude 读取两个文件]</span>
+
+<span class="prompt">Claude:</span> 分析完成。核心问题不是搜索"不准"，而是：
+<span class="output">1. 用户期望精确匹配，但系统做的是模糊搜索
+   → 埋点显示：72% 的搜索查询是完整标题或 DOI
+2. 无结果时没有引导
+   → "未找到结果"页面的跳出率 89%
+3. 筛选条件使用率极低（3.2%），因为默认折叠了</span>
+
+<span class="comment">── 第 2 轮：一起想方案 ──</span>
+
+<span class="prompt">You:</span> <span class="highlight">第 1 点很关键。那你觉得应该怎么改？
+     既要保留模糊搜索的能力，又要让精确匹配的用户满意</span>
+
+<span class="prompt">Claude:</span> 两种方案各有利弊：
+<span class="output">方案 A：自动识别查询类型
+- 输入像 DOI → 精确匹配
+- 输入像自然语言 → 模糊搜索
+- 优点：用户无感知，体验最好
+- 缺点：识别可能出错
+
+方案 B：双模式切换
+- 默认精确搜索，旁边一个"智能搜索"开关
+- 优点：用户有掌控感
+- 缺点：多一步操作，认知负担
+
+我倾向方案 A，因为你的埋点数据显示 72% 是精确查询，
+识别规则可以做得很简单（正则匹配 DOI 格式 + 标题长度阈值）。</span>
+
+<span class="comment">── 第 3 轮：落地为文档 ──</span>
+
+<span class="prompt">You:</span> <span class="highlight">同意方案 A。帮我写一份搜索优化方案文档，
+     保存到产品需求文档夹里</span>
+
+<span class="prompt">Claude:</span> 已创建 ~/Documents/产品/搜索优化方案-v1.md ✅
+    </div>
+
+    <div class="tip"><strong>核心模式：</strong>模糊想法 → 讨论澄清 → 对齐方案 → 落地为文件。你不用从一开始就想清楚——Claude 帮你从模糊走向清晰，而且全程可以调用你电脑上的真实数据做依据。</div>
+  </div>
+
+  <!-- 场景四：搜索与研究 -->
+  <div class="card" id="p6-research">
+    <h3>🔍 场景四：搜索和深度研究</h3>
+    <p>Claude Code 不只能读本地文件，还可以联网搜索。它会像研究员一样：搜索多个来源、交叉对比、整理成结构化结论。</p>
+    <div class="code-block">
+<span class="prompt">You:</span> <span class="highlight">帮我调研一下国内做科研情报产品的公司，
+     至少找 5 家，对比他们的核心功能和定价</span>
+
+<span class="comment">[Claude 搜索网页 → 访问各公司官网 → 整理对比表]</span>
+
+<span class="prompt">Claude:</span> 调研完成，找到 7 家相关公司：
+<span class="output">| 公司 | 核心功能 | 目标客户 | 定价模式 |
+|------|---------|---------|---------|
+| A 公司 | 文献追踪+推送 | 高校科研人员 | 按机构年费 |
+| B 公司 | 知识图谱+趋势分析 | 企业研发部门 | 按席位月费 |
+| ... | ... | ... | ... |</span>
+
+完整对比已保存到 ~/Documents/竞品调研.md。
+要不要我进一步分析他们的差异化定位？
+    </div>
+    <p>注意区别：搜索引擎给你<strong>链接列表</strong>，你得自己一个个打开看。Claude 给你<strong>整理好的结论</strong>，还能直接保存为文件。</p>
+  </div>
+
+  <!-- 场景五：系统化 -->
+  <div class="card" id="p6-system">
+    <h3>⚙️ 场景五：系统化——从手动到自动</h3>
+    <p>当你发现自己在重复做某件事时，就是该沉淀的信号。</p>
+
     <table class="compare-table">
-      <tr><th>层级</th><th>你会怎么做</th></tr>
-      <tr><td style="color: var(--green); font-weight:600;">L0</td><td>"帮我写一封感谢信" → 拿到结果</td></tr>
-      <tr><td style="color: var(--blue); font-weight:600;">L1</td><td>"帮我写感谢信" → "语气随意一点" → "加上这个细节" → 满意</td></tr>
-      <tr><td style="color: var(--accent); font-weight:600;">L2</td><td>"我想感谢领导对项目的支持，但不想太正式也不想太随便，你觉得什么调性合适？" → 讨论调性 → 写</td></tr>
-      <tr><td style="color: var(--orange); font-weight:600;">L3</td><td>"看看我最近的邮件风格，帮我给领导写封感谢信，关于XX项目"</td></tr>
-      <tr><td style="color: var(--pink); font-weight:600;">L4+</td><td>设置 /thank-letter command，以后一句话生成符合你风格的感谢信</td></tr>
+      <tr><th>你在重复做的事</th><th>沉淀方式</th><th>之后怎么用</th></tr>
+      <tr><td>每周写周报，格式一样</td><td>创建 <code>/weekly-report</code> command</td><td>一句话生成，自动参考上周格式</td></tr>
+      <tr><td>每次做用户访谈都要整理记录</td><td>创建 <code>/interview-note</code> command</td><td>说"整理访谈"，自动按固定结构输出</td></tr>
+      <tr><td>每天早上想看看今天的安排</td><td>设置定时任务</td><td>每天 8:00 自动汇总日历和待办</td></tr>
+      <tr><td>收到新的用户反馈要分类归档</td><td>创建自动化工作流</td><td>反馈进来后自动分类、打标签、通知</td></tr>
     </table>
-  </div>
 
-  <div class="card">
-    <h3>📂 场景二：整理文件</h3>
-    <div class="code-block">
-<span class="prompt">You:</span> <span class="highlight">帮我看看下载文件夹里有多少文件，按类型分类，
-     超过 30 天没打开的标记出来</span>
-
-<span class="prompt">Claude:</span> 我来分析一下你的下载文件夹...
-
-<span class="comment">[Claude 读取文件列表、检查修改时间]</span>
-
-📊 下载文件夹分析：
-- 总计 47 个文件
-- PDF（12个）：工作文档为主
-- 图片（18个）：截图和下载的图
-- 安装包（5个）：⚠️ 占用 2.3GB
-- 其他（12个）
-
-🕐 超过 30 天未打开（23个）：
-- setup_v2.dmg（186MB，62天前）
-- ...
-
-建议：要不要帮你把安装包和超期文件移到废纸篓？
-    </div>
-    <div class="tip"><strong>进阶：</strong>如果你经常整理文件，可以沉淀为一个 <code>/clean-downloads</code> command，设为每周定时执行——这就是 Level 4（系统模式）。</div>
-  </div>
-
-  <div class="card">
-    <h3>🔍 场景三：搜索和研究</h3>
-    <p>Claude Code 可以帮你做比搜索引擎深入得多的研究：</p>
-    <div class="code-block">
-<span class="prompt">You:</span> <span class="highlight">我想了解"个人知识管理"领域的主流方法论，
-     帮我对比 PARA、Zettelkasten 和 CODE 三种方法，
-     列出各自适合什么人</span>
-
-<span class="prompt">Claude:</span> 我来搜索和整理这几种方法论的信息...
-
-<span class="comment">[Claude 调用搜索工具，阅读多个来源，交叉对比]</span>
-
-# 个人知识管理三大方法论对比
-
-## PARA（Tiago Forte）
-- 核心：按行动力分类（项目/领域/资源/归档）
-- 适合：行动导向的人，项目多的职场人
-- 优势：上手快，与任务管理天然融合
-...
-    </div>
-    <p>注意区别：搜索引擎给你<strong>链接列表</strong>，Claude 给你<strong>整理好的答案</strong>。你省掉的是打开 10 个网页、逐个阅读、自己总结的时间。</p>
-  </div>
-
-  <div class="card">
-    <h3>📱 场景四：手机远程使用</h3>
-    <p>Claude Code 运行在你的电脑上，但你可以通过手机远程操控：</p>
-    <ul>
-      <li><strong>Telegram Bot</strong>：给你的 Bot 发消息 → 转发给电脑上的 Claude Code → 结果发回手机</li>
-      <li><strong>SSH</strong>：手机安装终端 App（如 Termius），直接连到电脑</li>
-    </ul>
-    <p>这意味着你出门在外也能让 AI 帮你处理电脑上的事——"帮我看看邮箱有没有重要邮件"、"把那个文件发给同事"。</p>
-    <div class="analogy"><strong>类比：</strong>就像远程遥控你办公桌上的助理——你在外面打电话告诉它做什么，它在办公室帮你做好。</div>
-  </div>
-
-  <div class="card">
-    <h3>⏰ 场景五：定时任务（Level 4）</h3>
-    <p>让 AI 按计划自动运转，不需要你手动触发：</p>
-    <ul>
-      <li><strong>每天早上 8:00</strong>：汇总昨天的工作记录，生成今日待办</li>
-      <li><strong>每周五下午</strong>：整理本周完成的任务，生成周报草稿</li>
-      <li><strong>每天晚上</strong>：检查下载文件夹，清理超期文件</li>
-      <li><strong>有新邮件时</strong>：自动分类，重要的发 Telegram 通知你</li>
-    </ul>
-    <p>这就是 Level 4（系统模式）的典型场景——你在<strong>设计系统</strong>，而不是在做具体任务。系统设计好后，AI 就按规则持续运转。</p>
+    <div class="analogy"><strong>判断标准：</strong>如果你做某件事时心里想"上次也是这么做的"——那就该沉淀了。第一次手动做，第二次沉淀为 Command / Skill / 自动化，第三次开始就是一句话的事。</div>
   </div>
 
   <div class="callout" style="margin-top: 2.5rem;">
@@ -1769,6 +2050,45 @@
   <p style="margin-top: 0.3rem;">by Alan · 2026</p>
   <p style="margin-top: 0.8rem; font-size: 0.8rem;">每一层的跨越不是技术问题，是认知跃迁。</p>
 </footer>
+</div><!-- .has-sidebar -->
+
+<script>
+// TOC active state tracking
+(function() {
+  const parts = document.querySelectorAll('.part');
+  const tocLinks = document.querySelectorAll('.toc-sidebar a');
+  const sidebar = document.getElementById('tocSidebar');
+
+  // Close sidebar on link click (mobile)
+  tocLinks.forEach(link => {
+    link.addEventListener('click', () => {
+      if (window.innerWidth <= 960) sidebar.classList.remove('open');
+    });
+  });
+
+  // Scroll spy
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const id = entry.target.id;
+        tocLinks.forEach(l => l.classList.remove('active'));
+        const activeLink = sidebar.querySelector(`a[href="#${id}"]`);
+        if (activeLink) {
+          activeLink.classList.add('active');
+          // Also highlight parent part link
+          let prev = activeLink.previousElementSibling;
+          while (prev && !prev.classList.contains('toc-part')) prev = prev.previousElementSibling;
+          if (prev) prev.classList.add('active');
+        }
+      }
+    });
+  }, { rootMargin: '-20% 0px -70% 0px' });
+
+  parts.forEach(p => observer.observe(p));
+  // Also observe cards with IDs for sub-nav
+  document.querySelectorAll('[id^="p"]').forEach(el => observer.observe(el));
+})();
+</script>
 
 </body>
 </html>
